@@ -30,21 +30,15 @@ export const adminLoginSchema = z.object({
 });
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
 
-// POST /api/auth/refresh — biasanya refreshToken dari cookie httpOnly,
-// tapi kalau dikirim via body juga tetap divalidasi
-export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1, "refreshToken wajib diisi"),
-});
-export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
+// POST /api/auth/refresh & POST /api/auth/logout — TIDAK butuh skema body.
+// Refresh token dibaca dari cookie httpOnly (COOKIE_REFRESH_TOKEN di
+// lib/auth/cookie.ts), bukan dikirim di body — jadi tidak ada yang divalidasi
+// Zod di sini, cukup req.cookies.get(...) di route handler.
 
-// POST /api/auth/logout
-export const logoutSchema = z.object({
-  refreshToken: z.string().min(1).optional(),
-});
-
-// POST /api/auth/forgot-password — kirim link reset ke email
+// POST /api/auth/forgot-password — noWa dipakai (bukan email) karena itu
+// identitas unik customer & channel notifikasi (WA via Fonnte) sudah ada di stack
 export const forgotPasswordSchema = z.object({
-  email: emailSchema,
+  noWa: noWaSchema,
 });
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 

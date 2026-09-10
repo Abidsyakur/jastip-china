@@ -34,6 +34,9 @@ model Admin {
   id           String    @id @default(cuid())
   nama         String
   noWa         String    @map("no_wa")
+  // Nullable di DB, tapi WAJIB diisi di level aplikasi (endpoint create-admin,
+  // modul admin) — email satu-satunya cara login admin (noWa tidak unique di
+  // sini), admin tanpa email akan terkunci permanen. Lihat modul auth.
   email        String?   @unique
   passwordHash String    @map("password_hash")
   role         AdminRole @default(STAFF)
