@@ -1,0 +1,424 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ======================================================
+// AKUN & KEAMANAN LOGIN
+// ======================================================
+
+model Customer {
+  id            String   @id @default(cuid())
+  nama          String
+  noWa          String   @unique @map("no_wa")
+  email         String?  @unique
+  passwordHash  String   @map("password_hash")
+  tglRegistrasi DateTime @default(now()) @map("tgl_registrasi")
+
+  alamat       Alamat[]
+  keranjang    Keranjang?
+  pesanan      Pesanan[]
+  permintaanPo PermintaanPo[]
+  notifikasi   Notifikasi[]
+  sesiLogin    SesiLogin[]
+  resetTokens  ResetPasswordToken[]
+
+  @@map("customers")
+}
+
+model Admin {
+  id           String    @id @default(cuid())
+  nama         String
+  noWa         String    @map("no_wa")
+  email        String?   @unique
+  passwordHash String    @map("password_hash")
+  role         AdminRole @default(STAFF)
+
+  produkDikelola         Produk[]
+  permintaanPoDireview   PermintaanPo[]
+  pembayaranDiverifikasi Pembayaran[]
+  logAktivitas           LogAktivitas[]
+  komplainLog            KomplainLog[]
+  sesiLogin              SesiLogin[]
+  resetTokens            ResetPasswordToken[]
+
+  @@map("admins")
+}
+
+enum AdminRole {
+  OWNER
+  STAFF
+}
+
+model Alamat {
+  id            String @id @default(cuid())
+  customerId    String @map("customer_id")
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label         String
+  penerima      String
+  noTelp        String @map("no_telp")
+  alamatLengkap String @map("alamat_lengkap")
+  kota          String
+  kodePos       String @map("kode_pos")
+
+  pesanan Pesanan[]
+
+  @@map("alamat")
+}
+
+// customerId / adminId nullable — cuma salah satu yang terisi.
+// Lihat catatan di atas soal keterbatasan relasi polimorfik di Prisma.
+model SesiLogin {
+  id               String   @id @default(cuid())
+  customerId       String?  @map("customer_id")
+  customer         Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  adminId          String?  @map("admin_id")
+  admin            Admin?   @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  refreshTokenHash String   @map("refresh_token_hash")
+  deviceInfo       String?  @map("device_info")
+  ipAddress        String?  @map("ip_address")
+  dibuatPada       DateTime @default(now()) @map("dibuat_pada")
+  kedaluwarsaPada  DateTime @map("kedaluwarsa_pada")
+  dicabut          Boolean  @default(false)
+
+  @@map("sesi_login")
+}
+
+model ResetPasswordToken {
+  id              String   @id @default(cuid())
+  customerId      String?  @map("customer_id")
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  adminId         String?  @map("admin_id")
+  admin           Admin?   @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tokenHash       String   @map("token_hash")
+  kedaluwarsaPada DateTime @map("kedaluwarsa_pada")
+  sudahDipakai    Boolean  @default(false) @map("sudah_dipakai")
+
+  @@map("reset_password_tokens")
+}
+
+// ======================================================
+// KATALOG PRODUK
+// ======================================================
+
+model Kategori {
+  id          String @id @default(cuid())
+  namaKategori String @map("nama_kategori")
+
+  produk Produk[]
+
+  @@map("kategori")
+}
+
+model Produk {
+  id            String       @id @default(cuid())
+  kategoriId    String       @map("kategori_id")
+  kategori      Kategori     @relation(fields: [kategoriId], references: [id])
+  adminId       String       @map("admin_id")
+  admin         Admin        @relation(fields: [adminId], references: [id])
+  namaProduk    String       @map("nama_produk")
+  deskripsi     String?
+  hargaAsalRmb  Decimal      @map("harga_asal_rmb") @db.Decimal(12, 2)
+  kurs          Decimal      @db.Decimal(10, 2)
+  hargaJualIdr  Decimal      @map("harga_jual_idr") @db.Decimal(12, 2)
+  beratGram     Int          @map("berat_gram")
+  linkSumber    String       @map("link_sumber")
+  stok          Int          @default(0)
+  status        ProdukStatus @default(AKTIF)
+
+  gambar         ProdukGambar[]
+  varian         ProdukVarian[]
+  keranjangItem  KeranjangItem[]
+  pesananItem    PesananItem[]
+
+  @@map("produk")
+}
+
+enum ProdukStatus {
+  AKTIF
+  NONAKTIF
+}
+
+model ProdukGambar {
+  id        String @id @default(cuid())
+  produkId  String @map("produk_id")
+  produk    Produk @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  urlGambar String @map("url_gambar")
+  urutan    Int    @default(0)
+
+  @@map("produk_gambar")
+}
+
+// Pendekatan simpel: 1 baris = 1 kombinasi lengkap (mis. "Medium - Premium suede")
+model ProdukVarian {
+  id             String  @id @default(cuid())
+  produkId       String  @map("produk_id")
+  produk         Produk  @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  namaVarian     String  @map("nama_varian")
+  stok           Int     @default(0)
+  hargaTambahan  Decimal @default(0) @map("harga_tambahan") @db.Decimal(12, 2)
+
+  keranjangItem KeranjangItem[]
+  pesananItem   PesananItem[]
+
+  @@map("produk_varian")
+}
+
+// ======================================================
+// REQUEST CUSTOM (DI LUAR KATALOG)
+// ======================================================
+
+model PermintaanPo {
+  id                  String             @id @default(cuid())
+  customerId          String             @map("customer_id")
+  customer            Customer           @relation(fields: [customerId], references: [id])
+  adminReviewerId     String?            @map("admin_reviewer_id")
+  adminReviewer       Admin?             @relation(fields: [adminReviewerId], references: [id])
+  linkProdukReferensi String?            @map("link_produk_referensi")
+  deskripsiSpesifikasi String            @map("deskripsi_spesifikasi")
+  fotoReferensiUrl    String?            @map("foto_referensi_url")
+  jumlahDiminta       Int                @map("jumlah_diminta")
+  status              PermintaanPoStatus @default(MENUNGGU_REVIEW)
+  estimasiHarga       Decimal?           @map("estimasi_harga") @db.Decimal(12, 2)
+  estimasiOngkir      Decimal?           @map("estimasi_ongkir") @db.Decimal(12, 2)
+  catatanAdmin        String?            @map("catatan_admin")
+  tglSubmit           DateTime           @default(now()) @map("tgl_submit")
+  tglRespon           DateTime?          @map("tgl_respon")
+
+  pesananItem PesananItem?
+
+  @@map("permintaan_po")
+}
+
+enum PermintaanPoStatus {
+  MENUNGGU_REVIEW
+  DIKONFIRMASI_HARGA
+  DITOLAK
+  SUDAH_JADI_PESANAN
+}
+
+// ======================================================
+// KERANJANG
+// ======================================================
+
+model Keranjang {
+  id         String @id @default(cuid())
+  customerId String @unique @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  item KeranjangItem[]
+
+  @@map("keranjang")
+}
+
+model KeranjangItem {
+  id             String        @id @default(cuid())
+  keranjangId    String        @map("keranjang_id")
+  keranjang      Keranjang     @relation(fields: [keranjangId], references: [id], onDelete: Cascade)
+  produkId       String        @map("produk_id")
+  produk         Produk        @relation(fields: [produkId], references: [id])
+  produkVarianId String?       @map("produk_varian_id")
+  produkVarian   ProdukVarian? @relation(fields: [produkVarianId], references: [id], onDelete: SetNull)
+  jumlah         Int
+
+  @@map("keranjang_item")
+}
+
+// ======================================================
+// TRANSAKSI
+// ======================================================
+
+model Pesanan {
+  id                 String        @id @default(cuid())
+  customerId         String        @map("customer_id")
+  customer           Customer      @relation(fields: [customerId], references: [id])
+  alamatId           String        @map("alamat_id")
+  alamat             Alamat        @relation(fields: [alamatId], references: [id])
+  noInvoice          String        @unique @map("no_invoice")
+  statusPesanan      StatusPesanan @default(MENUNGGU_PEMBAYARAN) @map("status_pesanan")
+  preferensiKurir    String        @map("preferensi_kurir")
+  subtotalProduk     Decimal       @map("subtotal_produk") @db.Decimal(12, 2)
+  biayaJasaTitip     Decimal       @map("biaya_jasa_titip") @db.Decimal(12, 2)
+  ongkirChinaGudang  Decimal       @map("ongkir_china_ke_gudang") @db.Decimal(12, 2)
+  ongkirDomestik     Decimal       @map("ongkir_domestik") @db.Decimal(12, 2)
+  biayaAdminPayment  Decimal       @default(0) @map("biaya_admin_payment") @db.Decimal(12, 2)
+  totalAkhir         Decimal       @map("total_akhir") @db.Decimal(12, 2)
+  tglPesan           DateTime      @default(now()) @map("tgl_pesan")
+
+  item        PesananItem[]
+  pembayaran  Pembayaran[]
+  statusLog   PesananStatusLog[]
+  pengiriman  Pengiriman?
+  notifikasi  Notifikasi[]
+
+  @@map("pesanan")
+}
+
+enum StatusPesanan {
+  MENUNGGU_PEMBAYARAN
+  DIPROSES_ADMIN
+  DIKONSOLIDASI_KIRIM
+  TIBA_KIRIM_LOKAL
+  SELESAI
+  DIBATALKAN
+}
+
+// Riwayat perpindahan status — inilah sumber tanggal yang ditampilkan
+// di halaman "Lacak status". Satu baris ditulis tiap kali status berubah.
+model PesananStatusLog {
+  id        String        @id @default(cuid())
+  pesananId String        @map("pesanan_id")
+  pesanan   Pesanan       @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  status    StatusPesanan
+  waktu     DateTime      @default(now())
+  catatan   String?
+
+  @@map("pesanan_status_log")
+}
+
+model PesananItem {
+  id                  String       @id @default(cuid())
+  pesananId           String       @map("pesanan_id")
+  pesanan             Pesanan      @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  sumberItem          SumberItem   @map("sumber_item")
+  produkId            String?      @map("produk_id")
+  produk              Produk?      @relation(fields: [produkId], references: [id])
+  produkVarianId      String?      @map("produk_varian_id")
+  produkVarian        ProdukVarian? @relation(fields: [produkVarianId], references: [id], onDelete: SetNull)
+  varianSnapshot      String?      @map("varian_snapshot")
+  permintaanPoId      String?      @unique @map("permintaan_po_id")
+  permintaanPo        PermintaanPo? @relation(fields: [permintaanPoId], references: [id])
+  namaItemSnapshot    String       @map("nama_item_snapshot")
+  hargaSatuanSaatBeli Decimal      @map("harga_satuan_saat_beli") @db.Decimal(12, 2)
+  jumlah              Int
+
+  komplain Komplain[]
+
+  @@map("pesanan_item")
+}
+
+enum SumberItem {
+  KATALOG
+  CUSTOM_PO
+}
+
+// Relasi ke Pesanan: satu-ke-banyak — 1 pesanan bisa punya beberapa
+// percobaan pembayaran (retry setelah kadaluarsa, tanpa batas).
+model Pembayaran {
+  id                  String           @id @default(cuid())
+  pesananId           String           @map("pesanan_id")
+  pesanan             Pesanan          @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  metode              String
+  status              StatusPembayaran @default(MENUNGGU_BUKTI)
+  jumlahBayar         Decimal          @map("jumlah_bayar") @db.Decimal(12, 2)
+  buktiUrl            String?          @map("bukti_url")
+  verifiedByAdminId   String?          @map("verified_by_admin_id")
+  verifiedByAdmin     Admin?           @relation(fields: [verifiedByAdminId], references: [id])
+  catatanAdmin        String?          @map("catatan_admin")
+  tglBayar            DateTime?        @map("tgl_bayar")
+  tglVerifikasi       DateTime?        @map("tgl_verifikasi")
+  kedaluwarsaPada     DateTime         @map("kedaluwarsa_pada")
+
+  @@map("pembayaran")
+}
+
+enum StatusPembayaran {
+  MENUNGGU_BUKTI      // baru dibuat, customer belum unggah bukti transfer
+  MENUNGGU_VERIFIKASI // bukti sudah diunggah, menunggu dicek admin
+  TERVERIFIKASI
+  DITOLAK
+  KADALUARSA
+}
+
+model Pengiriman {
+  id             String   @id @default(cuid())
+  pesananId      String   @unique @map("pesanan_id")
+  pesanan        Pesanan  @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  kurir          String?
+  noResi         String?  @map("no_resi")
+  statusKirim    String   @default("belum_dikirim") @map("status_kirim")
+  estimasiTiba   DateTime? @map("estimasi_tiba")
+
+  @@map("pengiriman")
+}
+
+// ======================================================
+// DUKUNGAN & AUDIT
+// ======================================================
+
+model Komplain {
+  id             String          @id @default(cuid())
+  pesananItemId  String          @map("pesanan_item_id")
+  pesananItem    PesananItem     @relation(fields: [pesananItemId], references: [id])
+  alasan         AlasanKomplain
+  buktiFoto      String          @map("bukti_foto")
+  deskripsi      String?
+  status         StatusKomplain  @default(DIAJUKAN)
+  solusi         SolusiKomplain?
+
+  log KomplainLog[]
+
+  @@map("komplain")
+}
+
+enum AlasanKomplain {
+  BARANG_RUSAK
+  TIDAK_SESUAI_DESKRIPSI
+  SALAH_KIRIM
+  LAINNYA
+}
+
+enum StatusKomplain {
+  DIAJUKAN
+  DIPROSES
+  SELESAI
+}
+
+enum SolusiKomplain {
+  KIRIM_ULANG
+  REFUND_SEBAGIAN
+  REFUND_PENUH
+  DITOLAK
+}
+
+model KomplainLog {
+  id          String   @id @default(cuid())
+  komplainId  String   @map("komplain_id")
+  komplain    Komplain @relation(fields: [komplainId], references: [id], onDelete: Cascade)
+  adminId     String   @map("admin_id")
+  admin       Admin    @relation(fields: [adminId], references: [id])
+  catatan     String
+  waktu       DateTime @default(now())
+
+  @@map("komplain_log")
+}
+
+model Notifikasi {
+  id         String   @id @default(cuid())
+  customerId String   @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  pesananId  String?  @map("pesanan_id")
+  pesanan    Pesanan? @relation(fields: [pesananId], references: [id])
+  pesan      String
+  tipe       String
+  statusBaca Boolean  @default(false) @map("status_baca")
+  tglKirim   DateTime @default(now()) @map("tgl_kirim")
+
+  @@map("notifikasi")
+}
+
+model LogAktivitas {
+  id              String   @id @default(cuid())
+  adminId         String   @map("admin_id")
+  admin           Admin    @relation(fields: [adminId], references: [id])
+  aksi            String
+  entitasTerkait  String   @map("entitas_terkait")
+  keterangan      String?
+  waktu           DateTime @default(now())
+
+  @@map("log_aktivitas")
+}
