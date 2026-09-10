@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Jastip China — Backend & API
 
 Implementasi teknis dari spesifikasi bisnis di `spesifikasi-jastip-china.md`.
@@ -66,7 +65,4 @@ statistik dashboard admin, rate limiting login.
 2. **Harga & varian di-snapshot saat transaksi**, tidak pernah direferensikan live ke tabel produk — riwayat invoice tidak berubah walau harga/varian produk berubah nanti.
 3. **Setiap aksi admin yang mengubah data penting (verifikasi bayar, hapus produk, dll) tercatat di `LogAktivitas`.**
 4. **Stok ditahan cuma selama jendela satu percobaan pembayaran aktif**, bukan sepanjang umur pesanan — memungkinkan retry tanpa batas tanpa mengunci stok selamanya.
-=======
-# jastip-china
-jastip nihao
->>>>>>> d37c4c65cdfb6806dd1db912e2581c63cf3b8fed
+=====
