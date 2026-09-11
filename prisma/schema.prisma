@@ -132,6 +132,8 @@ model Produk {
   linkSumber    String       @map("link_sumber")
   stok          Int          @default(0)
   status        ProdukStatus @default(AKTIF)
+  dibuatPada     DateTime     @default(now()) @map("dibuat_pada")
+  diperbaruiPada DateTime     @updatedAt @map("diperbarui_pada")
 
   gambar         ProdukGambar[]
   varian         ProdukVarian[]

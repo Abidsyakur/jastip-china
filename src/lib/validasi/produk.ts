@@ -1,14 +1,22 @@
+// letak: src/lib/validasi/produk.ts
 import { z } from "zod";
 import { ProdukStatus } from "@prisma/client";
 import { cuidSchema, paginationSchema, uangPositifSchema, uangSchema } from "./common";
 
-// GET /api/produk — query publik: filter kategori, cari, sort, pagination
+// GET /api/produk — query publik: cuma produk AKTIF, filter kategori, cari, sort, pagination
 export const produkQuerySchema = paginationSchema.extend({
   kategoriId: cuidSchema.optional(),
   cari: z.string().trim().max(100).optional(),
   sort: z.enum(["terbaru", "termurah", "termahal"]).default("terbaru"),
 });
 export type ProdukQuery = z.infer<typeof produkQuerySchema>;
+
+// GET /api/admin/produk — sama seperti publik, tapi admin bisa filter status
+// (termasuk lihat produk NONAKTIF) untuk keperluan list di panel admin
+export const produkAdminQuerySchema = produkQuerySchema.extend({
+  status: z.nativeEnum(ProdukStatus).optional(), // kosong = semua status
+});
+export type ProdukAdminQuery = z.infer<typeof produkAdminQuerySchema>;
 
 // --- Admin: POST/PATCH /api/admin/produk ---
 
@@ -39,6 +47,8 @@ export const produkCreateSchema = z.object({
 });
 export type ProdukCreateInput = z.infer<typeof produkCreateSchema>;
 
-// PATCH /api/admin/produk/[id] — semua field opsional (partial update)
+// PATCH /api/admin/produk/[id] — semua field opsional (partial update).
+// gambarUrls/varian kalau dikirim berarti REPLACE seluruh daftar lama
+// (bukan patch per-item) — lihat catatan trade-off di route handler.
 export const produkUpdateSchema = produkCreateSchema.partial();
 export type ProdukUpdateInput = z.infer<typeof produkUpdateSchema>;
