@@ -12,7 +12,7 @@
 // src/app/api/admin/produk/__tests__/produk-admin.test.ts).
 //
 // POLA YANG BENAR (penting, sempat salah dan makan waktu debug):
-//   1. mock.module("@/lib/db", { exports: { prisma: fakePrisma } })
+//   1. mock.module("@/lib/db", { namedExports: { prisma: fakePrisma } })
 //      SEKALI SAJA di `before()`, dengan fakePrisma = objek mutable kosong.
 //   2. Import route handler (POST/GET/dst) SEKALI SAJA di `before()` juga,
 //      simpan ke variabel di scope file.
@@ -31,6 +31,24 @@
 // (`prisma.$transaction(...)`) selalu dievaluasi saat DIPANGGIL, bukan saat
 // modul di-import.
 import { mock } from "node:test";
+
+/**
+ * Class error minimal yang meniru Prisma.PrismaClientKnownRequestError asli
+ * (cukup punya `code` dan `instanceof` yang benar) — dipakai route handler
+ * untuk membedakan P2025 (not found), P2002 (unique constraint), P2003 (FK
+ * constraint), dll. Route.ts mengimpor `Prisma` dari "@prisma/client" yang
+ * di-mock ini juga, jadi `instanceof` di route.ts akan cocok dengan yang
+ * dipakai bikin error palsu di test — asal DUA-DUANYA sama-sama lewat mock
+ * ini (bukan salah satunya import dari @prisma/client yang tidak di-mock).
+ */
+class PrismaClientKnownRequestErrorMock extends Error {
+  code: string;
+  constructor(message: string, code = "P2025") {
+    super(message);
+    this.name = "PrismaClientKnownRequestError";
+    this.code = code;
+  }
+}
 
 export const ENUM_MOCK = {
   AdminRole: { OWNER: "OWNER", STAFF: "STAFF" },
@@ -69,6 +87,11 @@ export const ENUM_MOCK = {
     REFUND_SEBAGIAN: "REFUND_SEBAGIAN",
     REFUND_PENUH: "REFUND_PENUH",
     DITOLAK: "DITOLAK",
+  },
+  // Bukan enum dari schema — ini namespace Prisma bawaan yang dipakai buat
+  // deteksi error (P2025 not found, P2002 unique, P2003 FK constraint, dst).
+  Prisma: {
+    PrismaClientKnownRequestError: PrismaClientKnownRequestErrorMock,
   },
 } as const;
 

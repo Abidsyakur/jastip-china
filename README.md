@@ -68,9 +68,9 @@ src/
 
 ## Status pengerjaan
 
-✅ Selesai: skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, **katalog produk + kategori (admin CRUD + publik)**.
+✅ Selesai: skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori (admin CRUD + publik), keranjang, **alamat**.
 
-🚧 Sedang dikerjakan: keranjang, alamat, checkout, pembayaran manual, custom PO, upload file, notifikasi WA, komplain, statistik dashboard admin.
+🚧 Sedang dikerjakan: checkout, pembayaran manual, custom PO, upload file, notifikasi WA, komplain, statistik dashboard admin.
 
 ⏳ Belum dikerjakan (tidak menghalangi jalan, bisa menyusul):
 - Validasi terstruktur pakai Zod (saat ini validasi manual per endpoint)
@@ -145,7 +145,44 @@ Endpoint yang sudah jadi:
 - Ditambahkan `dibuatPada`/`diperbaruiPada` ke `Produk` (migration baru) — dibutuhkan supaya sort "terbaru" akurat, sebelumnya schema tidak punya timestamp sama sekali di tabel ini.
 - Kategori tidak bisa dihapus kalau masih dipakai produk (409, bukan 500) — FK constraint Postgres ditangkap dan diberi pesan yang jelas ke admin.
 
-**Testing**: 21 unit/integration test lolos tanpa perlu Postgres asli — pakai `mock.module()` (Node 22, `--experimental-test-module-mocks`) untuk mock `@/lib/db` dan `@prisma/client`. Pola mock yang dipakai didokumentasikan di `src/test-utils/mock-prisma-client.ts` — **penting dibaca sebelum nulis test baru** untuk modul lain, ada jebakan soal caching modul ES yang sempat bikin test false-negative.
+**Testing**: 21 unit/integration test — pakai `mock.module()` (Node 22, `--experimental-test-module-mocks`) untuk mock `@/lib/db` dan `@prisma/client`. Pola mock yang dipakai didokumentasikan di `src/test-utils/mock-prisma-client.ts` — **penting dibaca sebelum nulis test baru** untuk modul lain, ada jebakan soal caching modul ES yang sempat bikin test false-negative.
+
+## Modul: Keranjang
+
+Endpoint yang sudah jadi (semua butuh login **customer**, admin ditolak 403):
+
+| Endpoint | Catatan |
+|---|---|
+| `GET /api/keranjang` | Isi keranjang + `hargaSatuan`/`subtotal`/`total` dihitung on-the-fly dari harga produk TERKINI (bukan snapshot — snapshot beneran baru terjadi saat checkout) |
+| `POST /api/keranjang` | Tambah item. Kombinasi produk+varian yang sama digabung jumlahnya (bukan baris duplikat) |
+| `PATCH /api/keranjang/[itemId]` | Ubah jumlah |
+| `DELETE /api/keranjang/[itemId]` | Hapus item |
+
+**Keputusan desain penting:**
+- `Keranjang` di-*lazy-create* (`lib/keranjang.ts` § `getOrBuatKeranjang`) saat pertama kali diakses, bukan saat register — modul auth yang sudah jadi tidak perlu diubah. Race kecil (dua request nyaris bersamaan) ditangani lewat catch `P2002` pada unique constraint `customerId`.
+- **Cek kepemilikan item** di PATCH/DELETE: item yang bukan milik customer yang login dapat respons 404 yang **sama persis** dengan item yang benar-benar tidak ada — supaya endpoint ini tidak bisa dipakai menebak-nebak ID item milik customer lain.
+- **Cek stok di keranjang itu soft-check**, bukan reservasi atomik seperti di checkout nanti — cukup untuk UX ("stok tidak cukup") karena belum ada komitmen uang di tahap keranjang. Reservasi stok sungguhan (dengan guard atomik `UPDATE ... WHERE stok >= X`, sesuai pembahasan arsitektur) baru terjadi di modul pesanan/pembayaran.
+- Produk yang punya varian **wajib** pilih salah satu varian saat ditambah ke keranjang (tidak bisa polos tanpa varian) — konsisten dengan keputusan "ProdukVarian.stok jadi sumber kebenaran kalau ada varian".
+
+**Testing**: 13 test baru (34 total) — termasuk test khusus untuk kalkulasi harga (produk + varian) dan ownership check di PATCH/DELETE.
+
+## Modul: Alamat
+
+Endpoint yang sudah jadi (semua butuh login **customer**):
+
+| Endpoint | Catatan |
+|---|---|
+| `GET /api/alamat` | List alamat milik customer yang login |
+| `POST /api/alamat` | Tambah alamat baru |
+| `PATCH /api/alamat/[id]` | Update (ownership check) |
+| `DELETE /api/alamat/[id]` | Hapus (ownership check + 409 kalau sudah dipakai pesanan) |
+
+**Keputusan desain penting:**
+- `customerId` **selalu** diambil dari token (`user.sub`), bukan dari body request, walau client kirim field itu — dites eksplisit (`POST /api/alamat dengan data valid berhasil, customerId diambil dari token bukan dari body`) supaya tidak ada yang bisa bikin alamat atas nama customer lain.
+- `Alamat.id` direferensikan `Pesanan.alamatId` (wajib, tanpa `onDelete`, default RESTRICT) — alamat yang sudah pernah dipakai checkout **tidak bisa dihapus** (409 dengan pesan jelas, bukan 500), supaya riwayat pesanan lama tetap utuh. Tidak perlu soft-delete karena Postgres sudah melindungi ini secara alami.
+- Ownership check di PATCH/DELETE pakai pola yang sama seperti keranjang: 404 seragam untuk "tidak ada" maupun "bukan milik kamu".
+
+**Testing**: 8 test baru (42 total). Sekalian menambah `Prisma.PrismaClientKnownRequestError` ke `src/test-utils/mock-prisma-client.ts` — dipakai buat test endpoint mana pun yang menangkap error FK constraint (P2003) atau not-found (P2025) dari Prisma.
 
 ## Prinsip penting yang diikuti di seluruh kode
 
