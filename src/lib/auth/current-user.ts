@@ -1,3 +1,4 @@
+// letak: src/lib/auth/current-user.ts
 import type { NextRequest } from "next/server";
 import type { AdminRole } from "@prisma/client";
 import { COOKIE_ACCESS_TOKEN } from "./cookie";
@@ -46,5 +47,16 @@ export async function wajibAdmin(
   if (roleDiizinkan && (!user.role || !roleDiizinkan.includes(user.role))) {
     throw new TidakDiizinkanError("Role kamu tidak memiliki izin untuk aksi ini");
   }
+  return user;
+}
+
+/**
+ * Lempar TidakDiizinkanError kalau BUKAN customer (mis. admin coba akses
+ * endpoint keranjang/alamat/pesanan yang cuma untuk customer). Dipakai di
+ * semua endpoint customer-facing yang bukan publik.
+ */
+export async function wajibCustomer(req: NextRequest): Promise<AccessTokenPayload> {
+  const user = await wajibLogin(req);
+  if (user.tipe !== "customer") throw new TidakDiizinkanError("Butuh akses customer");
   return user;
 }
