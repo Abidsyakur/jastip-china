@@ -1,17 +1,19 @@
+// letak: src/lib/validasi/pembayaran.ts
 import { z } from "zod";
 import { StatusPembayaran } from "@prisma/client";
-import { uangPositifSchema } from "./common";
+import { paginationSchema } from "./common";
 
 // POST /api/pesanan/[id]/pembayaran — bikin percobaan bayar baru (termasuk retry
-// setelah kadaluarsa — Pembayaran satu-ke-banyak terhadap Pesanan, jadi ini
-// aman dipanggil berkali-kali untuk pesanan yang sama)
+// setelah kadaluarsa/ditolak — Pembayaran satu-ke-banyak terhadap Pesanan).
+// SENGAJA tidak ada field jumlahBayar di sini — itu SELALU dihitung server
+// dari pesanan.totalAkhir, tidak pernah dipercaya dari input client (supaya
+// tidak ada yang bisa "checkout ulang" dengan nominal yang dimanipulasi).
 export const buatPembayaranSchema = z.object({
   metode: z.string().trim().min(1, "Metode pembayaran wajib diisi").max(50),
-  jumlahBayar: uangPositifSchema,
 });
 export type BuatPembayaranInput = z.infer<typeof buatPembayaranSchema>;
 
-// PATCH /api/pembayaran/[id]/bukti — customer upload bukti transfer
+// PATCH /api/pesanan/[id]/pembayaran/bukti — customer upload bukti transfer
 export const uploadBuktiSchema = z.object({
   buktiUrl: z.string().url("URL bukti transfer tidak valid"),
   tglBayar: z.coerce.date(),
@@ -33,3 +35,10 @@ export const verifikasiPembayaranSchema = z
     path: ["catatanAdmin"],
   });
 export type VerifikasiPembayaranInput = z.infer<typeof verifikasiPembayaranSchema>;
+
+// GET /api/admin/pembayaran — list untuk panel admin, default tampilkan yang
+// perlu ditinjau (MENUNGGU_VERIFIKASI) kalau status tidak difilter eksplisit
+export const pembayaranAdminQuerySchema = paginationSchema.extend({
+  status: z.nativeEnum(StatusPembayaran).optional(),
+});
+export type PembayaranAdminQuery = z.infer<typeof pembayaranAdminQuerySchema>;

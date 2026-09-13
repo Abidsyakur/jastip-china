@@ -26,3 +26,26 @@ export function tanganiErrorAuth(err: unknown): NextResponse | null {
   }
   return null;
 }
+
+/**
+ * Error domain generik yang sudah tahu status HTTP-nya sendiri. Dipakai
+ * sebagai base class untuk error spesifik-modul (CheckoutError, PembayaranError,
+ * dst) supaya route handler cukup satu jenis catch untuk semuanya, bukan
+ * daftar `instanceof` yang makin panjang tiap nambah modul baru.
+ */
+export class AppError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "AppError";
+    this.status = status;
+  }
+}
+
+/** Sama seperti tanganiErrorAuth, tapi untuk AppError (dan semua turunannya). */
+export function tanganiAppError(err: unknown): NextResponse | null {
+  if (err instanceof AppError) {
+    return NextResponse.json({ error: err.message }, { status: err.status });
+  }
+  return null;
+}

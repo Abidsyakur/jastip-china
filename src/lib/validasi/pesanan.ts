@@ -1,12 +1,16 @@
+// letak: src/lib/validasi/pesanan.ts
 import { z } from "zod";
 import { StatusPesanan } from "@prisma/client";
 import { cuidSchema } from "./common";
 
-// POST /api/pesanan — checkout, item dipilih sebagian dari keranjang
+// POST /api/pesanan — checkout, item dipilih sebagian dari keranjang.
+// Langsung bikin percobaan pembayaran pertama sekalian (lihat lib/stok.ts +
+// route handler) — makanya metode pembayaran wajib diisi di sini.
 export const checkoutSchema = z.object({
   alamatId: cuidSchema,
   keranjangItemIds: z.array(cuidSchema).min(1, "Pilih minimal 1 item untuk checkout"),
   preferensiKurir: z.string().trim().min(1, "Preferensi kurir wajib diisi").max(50),
+  metode: z.string().trim().min(1, "Metode pembayaran wajib diisi").max(50),
 });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 

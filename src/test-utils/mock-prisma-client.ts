@@ -36,12 +36,22 @@ import { mock } from "node:test";
  * Class error minimal yang meniru Prisma.PrismaClientKnownRequestError asli
  * (cukup punya `code` dan `instanceof` yang benar) — dipakai route handler
  * untuk membedakan P2025 (not found), P2002 (unique constraint), P2003 (FK
- * constraint), dll. Route.ts mengimpor `Prisma` dari "@prisma/client" yang
- * di-mock ini juga, jadi `instanceof` di route.ts akan cocok dengan yang
- * dipakai bikin error palsu di test — asal DUA-DUANYA sama-sama lewat mock
- * ini (bukan salah satunya import dari @prisma/client yang tidak di-mock).
+ * constraint), dll.
+ *
+ * PENTING — cara pakai yang BENAR di test:
+ *   import { PrismaClientKnownRequestError } from "@/test-utils/mock-prisma-client";
+ *   throw new PrismaClientKnownRequestError("pesan", "P2003");
+ *
+ * JANGAN `const { Prisma } = await import("@prisma/client")` di dalam test
+ * untuk membuat error ini — walau "@prisma/client" sudah di-mock lewat
+ * mockPrismaClientModule(), dynamic import() terpisah di dalam test ternyata
+ * bisa resolve ke identitas modul yang BEDA dari static import di route.ts
+ * (kemungkinan besar soal urutan/kondisi resolusi `exports` map Prisma,
+ * beda perilaku antar versi Node) — akibatnya `instanceof` di route.ts gagal
+ * cocok dan Prisma ASLI yang tertangkap, bukan mock-nya. Import LANGSUNG dari
+ * sini menghindari ambiguitas itu sepenuhnya karena cuma ada SATU jalur resolusi.
  */
-class PrismaClientKnownRequestErrorMock extends Error {
+export class PrismaClientKnownRequestError extends Error {
   code: string;
   constructor(message: string, code = "P2025") {
     super(message);
@@ -91,7 +101,7 @@ export const ENUM_MOCK = {
   // Bukan enum dari schema — ini namespace Prisma bawaan yang dipakai buat
   // deteksi error (P2025 not found, P2002 unique, P2003 FK constraint, dst).
   Prisma: {
-    PrismaClientKnownRequestError: PrismaClientKnownRequestErrorMock,
+    PrismaClientKnownRequestError: PrismaClientKnownRequestError,
   },
 } as const;
 

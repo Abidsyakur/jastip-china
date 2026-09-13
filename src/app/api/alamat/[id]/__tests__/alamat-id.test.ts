@@ -2,7 +2,7 @@
 import { test, mock, before, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { NextRequest } from "next/server";
-import { mockPrismaClientModule } from "@/test-utils/mock-prisma-client";
+import { mockPrismaClientModule, PrismaClientKnownRequestError } from "@/test-utils/mock-prisma-client";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fakePrisma: any = {};
@@ -64,11 +64,7 @@ test("DELETE alamat yang sudah dipakai pesanan (FK P2003) ditolak 409, bukan 500
   fakePrisma.alamat = {
     findUnique: async () => ({ id: "alamat_1", customerId: "cust_1" }),
     delete: async () => {
-      const { Prisma } = await import("@prisma/client");
-      throw new Prisma.PrismaClientKnownRequestError("FK constraint", {
-        code: "P2003",
-        clientVersion: "5.0.0", // atau isi versi prisma yang digunakan
-        });
+      throw new PrismaClientKnownRequestError("FK constraint", "P2003");
     },
   };
 

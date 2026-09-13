@@ -68,9 +68,9 @@ src/
 
 ## Status pengerjaan
 
-✅ Selesai: skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori (admin CRUD + publik), keranjang, **alamat**.
+✅ Selesai: skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori (admin CRUD + publik), keranjang, alamat, **pesanan + pembayaran manual lengkap** (checkout, upload bukti, retry, verifikasi admin, cron kedaluwarsa).
 
-🚧 Sedang dikerjakan: checkout, pembayaran manual, custom PO, upload file, notifikasi WA, komplain, statistik dashboard admin.
+🚧 Sedang dikerjakan: custom PO, upload file, notifikasi WA, komplain, statistik dashboard admin, endpoint admin untuk isi biaya jasa titip/ongkir.
 
 ⏳ Belum dikerjakan (tidak menghalangi jalan, bisa menyusul):
 - Validasi terstruktur pakai Zod (saat ini validasi manual per endpoint)
@@ -183,6 +183,49 @@ Endpoint yang sudah jadi (semua butuh login **customer**):
 - Ownership check di PATCH/DELETE pakai pola yang sama seperti keranjang: 404 seragam untuk "tidak ada" maupun "bukan milik kamu".
 
 **Testing**: 8 test baru (42 total). Sekalian menambah `Prisma.PrismaClientKnownRequestError` ke `src/test-utils/mock-prisma-client.ts` — dipakai buat test endpoint mana pun yang menangkap error FK constraint (P2003) atau not-found (P2025) dari Prisma.
+
+## Modul: Pesanan & Pembayaran
+
+> Modul paling kompleks di project ini — implementasi langsung dari semua yang dibahas di tahap arsitektur (guard stok atomik, snapshot harga, race cron-vs-admin).
+
+### Bagian 1 — Checkout
+
+| Endpoint | Auth | Catatan |
+|---|---|---|
+| `POST /api/pesanan` | Customer | Checkout — lihat detail alur di bawah |
+| `GET /api/pesanan` | Customer | Riwayat pesanan milik sendiri |
+| `GET /api/pesanan/[id]` | Customer | Detail 1 pesanan (ownership check) |
+
+**Alur checkout (`lib/pesanan.ts` § `prosesCheckout`):**
+1. Validasi `alamatId` milik customer yang checkout.
+2. Ambil `KeranjangItem` sesuai `keranjangItemIds` — jumlah hasil query harus PERSIS sama dengan yang diminta, kalau kurang berarti ada item yang tidak ada/bukan milik customer ini (404 generik, tidak dibedakan alasannya).
+3. Tolak (409) kalau ada produk yang sudah NONAKTIF sejak ditambah ke keranjang.
+4. **Dalam satu `$transaction`**: untuk tiap item — hitung harga snapshot, jalankan guard stok atomik (`lib/stok.ts` § `kurangiStokAtomik`, pola `UPDATE ... WHERE stok >= jumlah`), kalau stok kurang di item MANA PUN → seluruh transaksi batal (tidak ada checkout "separuh berhasil"). Baru setelah semua item lolos: buat `Pesanan` + `PesananItem` (snapshot) + `PesananStatusLog` (`MENUNGGU_PEMBAYARAN`) + `Pembayaran` pertama (`MENUNGGU_BUKTI`), lalu hapus item yang barusan checkout dari `KeranjangItem`.
+5. `noInvoice` di-retry maksimal 3x kalau kebetulan tabrakan (sangat jarang, `@unique` di schema sebagai jaring pengaman akhir).
+
+`biayaJasaTitip`, `ongkirChinaGudang`, `ongkirDomestik` di-set **0 saat checkout** — belum ada kalkulator tarif, diisi manual oleh admin belakangan (keputusan produk). **Belum ada endpoint admin untuk isi biaya ini** — masuk daftar "sedang dikerjakan".
+
+### Bagian 2 — Pembayaran (retry, verifikasi, kedaluwarsa)
+
+| Endpoint | Auth | Catatan |
+|---|---|---|
+| `POST /api/pesanan/[id]/pembayaran` | Customer | Retry — bikin percobaan bayar BARU (bukan update yang lama) |
+| `PATCH /api/pesanan/[id]/pembayaran/bukti` | Customer | Upload bukti transfer untuk percobaan TERAKHIR |
+| `GET /api/admin/pembayaran` | Admin | List untuk panel admin, default filter `MENUNGGU_VERIFIKASI` |
+| `PATCH /api/admin/pembayaran/[id]/verifikasi` | Admin (OWNER/STAFF) | Terima/tolak |
+| `GET /api/cron/cek-kedaluwarsa` | `Authorization: Bearer $CRON_SECRET` | Dijadwalkan `vercel.json`, tiap 15 menit |
+
+**Keputusan & mekanisme kunci (`lib/pembayaran.ts`):**
+- **Retry** (`buatPercobaanBayarBaru`) cuma boleh jalan kalau `Pesanan.statusPesanan` masih `MENUNGGU_PEMBAYARAN` DAN tidak ada percobaan bayar lain yang masih aktif (`MENUNGGU_BUKTI`/`MENUNGGU_VERIFIKASI`/`TERVERIFIKASI`). Stok di-guard atomik ULANG (`kurangiStokAtomik`) — **retry BISA gagal** kalau stok sudah diambil orang lain selama jendela kosong antara expired dan retry. Ini bukan bug, memang skenario yang diantisipasi sejak tahap arsitektur.
+- **`jumlahBayar` SELALU dari `pesanan.totalAkhir`**, tidak pernah dari body request — field itu sengaja dihapus dari skema Zod `buatPembayaranSchema` supaya tidak ada cara client mengirimnya sama sekali (dites eksplisit).
+- **Upload bukti & verifikasi admin** dua-duanya pakai guard atomik `WHERE status = <status lama>` (bukan baca-lalu-tulis) — persis pola yang dibahas di arsitektur untuk cegah race.
+- **Verifikasi DITOLAK** → stok dikembalikan (`kembalikanStok`), status `Pesanan` TIDAK berubah (masih `MENUNGGU_PEMBAYARAN`, customer boleh retry). **Verifikasi TERVERIFIKASI** → `Pesanan` pindah ke `DIPROSES_ADMIN` + `PesananStatusLog` baru, stok TIDAK disentuh (sudah benar sejak checkout). Dua-duanya tercatat di `LogAktivitas`.
+- **Cron** (`prosesKedaluwarsaPembayaran`) memproses tiap kandidat dalam transaksi TERPISAH per baris, guard atomik `WHERE status = <status saat difetch>` — kalau admin sempat verifikasi tepat di detik yang sama, cron "kalah" untuk baris itu dan di-skip (tidak dobel proses). Sengaja per-baris (bukan satu `UPDATE ... RETURNING` batch) demi portabilitas kode Prisma biasa, bukan raw SQL — cukup untuk skala cron 15 menitan, bisa dioptimasi nanti kalau volume jadi masalah.
+- Cron **bukan** endpoint customer/admin — auth-nya `CRON_SECRET` di header `Authorization`, dicocokkan Vercel otomatis sesuai `vercel.json`.
+
+**Refactor kecil**: `AppError` (di `lib/http-error.ts`) jadi base class generik untuk `CheckoutError`/`PembayaranError` — route handler cukup satu `tanganiAppError()`, tidak perlu daftar `instanceof` yang tambah panjang tiap modul baru.
+
+**Testing**: 29 test baru (71 total) — termasuk simulasi race cron-vs-admin yang eksplisit (satu kandidat "menang", satu "kalah", stok cuma dikembalikan untuk yang menang).
 
 ## Prinsip penting yang diikuti di seluruh kode
 
