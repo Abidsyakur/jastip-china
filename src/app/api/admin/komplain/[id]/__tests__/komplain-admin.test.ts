@@ -31,7 +31,16 @@ function konteks(id = "komplain_1") {
 }
 
 test("PATCH tindak lanjut ditolak 409 kalau komplain sudah SELESAI (guard atomik)", async () => {
-  fakePrisma.komplain = { findUnique: async () => ({ id: "komplain_1", status: "SELESAI" }) };
+  fakePrisma.komplain = {
+    findUnique: async () => ({
+      id: "komplain_1",
+      status: "SELESAI",
+      pesananItem: {
+        pesananId: "pesanan_1",
+        pesanan: { customerId: "cust_1", customer: { noWa: "6281234567890" } },
+      },
+    }),
+  };
   fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
     fn({ komplain: { updateMany: async () => ({ count: 0 }) } });
 
@@ -48,7 +57,16 @@ test("PATCH tindak lanjut berhasil: KomplainLog ditambah, LogAktivitas tercatat"
   let logKomplainDibuat = false;
   let logAktivitasDibuat: Record<string, unknown> | undefined;
 
-  fakePrisma.komplain = { findUnique: async () => ({ id: "komplain_1", status: "DIAJUKAN" }) };
+  fakePrisma.komplain = {
+    findUnique: async () => ({
+      id: "komplain_1",
+      status: "DIAJUKAN",
+      pesananItem: {
+        pesananId: "pesanan_1",
+        pesanan: { customerId: "cust_1", customer: { noWa: "6281234567890" } },
+      },
+    }),
+  };
   fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
     fn({
       komplain: { updateMany: async () => ({ count: 1 }) },
@@ -64,6 +82,7 @@ test("PATCH tindak lanjut berhasil: KomplainLog ditambah, LogAktivitas tercatat"
           return {};
         },
       },
+      notifikasi: { create: async () => ({}) },
     });
 
   const req = new NextRequest("http://localhost/api/admin/komplain/komplain_1", {

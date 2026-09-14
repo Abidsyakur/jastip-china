@@ -4,7 +4,9 @@ import { prisma } from "@/lib/db";
 import { kurangiStokAtomik } from "@/lib/stok";
 import { buatNoInvoice } from "@/lib/no-invoice";
 import { AppError } from "@/lib/http-error";
-import type { CheckoutInput } from "@/lib/validasi";
+import { catatLogAktivitas } from "@/lib/log-aktivitas";
+import { buatNotifikasi, kirimNotifikasiWa } from "@/lib/notifikasi";
+import type { CheckoutInput, UpdateBiayaInput, UpdateStatusPesananInput, UpdatePengirimanInput } from "@/lib/validasi";
 
 const JAM_KEDALUWARSA_PEMBAYARAN = Number(process.env.PEMBAYARAN_KEDALUWARSA_JAM ?? 24);
 const MAKS_PERCOBAAN_NO_INVOICE = 3;
@@ -144,4 +146,117 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
   // Praktis tidak akan pernah sampai sini (peluang 3x tabrakan berturut-turut
   // hampir nol), tapi TypeScript perlu return path yang eksplisit.
   throw new CheckoutError("Gagal membuat pesanan, coba lagi", 500);
+}
+
+/** Error untuk operasi admin di modul pesanan (biaya, status, pengiriman) — terpisah dari CheckoutError secara semantik, sama-sama AppError. */
+export class PesananError extends AppError {
+  constructor(message: string, status: number) {
+    super(message, status);
+    this.name = "PesananError";
+  }
+}
+
+const STATUS_TERMINAL = new Set<StatusPesanan>([StatusPesanan.SELESAI, StatusPesanan.DIBATALKAN]);
+
+/**
+ * Admin isi biayaJasaTitip/ongkirDomestik (di-set 0 saat checkout, lihat
+ * catatan di prosesCheckout). totalAkhir dihitung ULANG di sini dari
+ * subtotalProduk + ongkirChinaGudang (tersimpan) + biaya baru — tidak pernah
+ * dipercaya dari client.
+ */
+export async function updateBiayaPesanan(pesananId: string, input: UpdateBiayaInput) {
+  const pesanan = await prisma.pesanan.findUnique({ where: { id: pesananId } });
+  if (!pesanan) throw new PesananError("Pesanan tidak ditemukan", 404);
+
+  const biayaAdminPayment = input.biayaAdminPayment ?? Number(pesanan.biayaAdminPayment);
+  const totalAkhir =
+    Number(pesanan.subtotalProduk) +
+    input.biayaJasaTitip +
+    Number(pesanan.ongkirChinaGudang) +
+    input.ongkirDomestik +
+    biayaAdminPayment;
+
+  return prisma.pesanan.update({
+    where: { id: pesananId },
+    data: {
+      biayaJasaTitip: input.biayaJasaTitip,
+      ongkirDomestik: input.ongkirDomestik,
+      biayaAdminPayment,
+      totalAkhir,
+    },
+  });
+}
+
+/**
+ * Admin ubah status pesanan (pipeline pengiriman). Guard ringan: pesanan yang
+ * sudah di status TERMINAL (SELESAI/DIBATALKAN) tidak bisa diubah lagi lewat
+ * endpoint ini. SETIAP perubahan WAJIB nambah baris PesananStatusLog (sumber
+ * kebenaran untuk halaman "Lacak status" customer), bukan cuma update kolom.
+ */
+export async function updateStatusPesanan(adminId: string, pesananId: string, input: UpdateStatusPesananInput) {
+  const pesanan = await prisma.pesanan.findUnique({
+    where: { id: pesananId },
+    include: { customer: { select: { noWa: true } } },
+  });
+  if (!pesanan) throw new PesananError("Pesanan tidak ditemukan", 404);
+
+  if (STATUS_TERMINAL.has(pesanan.statusPesanan)) {
+    throw new PesananError(
+      `Pesanan sudah berstatus ${pesanan.statusPesanan}, tidak bisa diubah lagi`,
+      409
+    );
+  }
+
+  const pesanNotif = `Status pesanan ${pesanan.noInvoice} diperbarui jadi ${input.status}.`;
+
+  const hasil = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    await tx.pesanan.update({ where: { id: pesananId }, data: { statusPesanan: input.status } });
+    await tx.pesananStatusLog.create({ data: { pesananId, status: input.status } });
+    await catatLogAktivitas(
+      tx,
+      adminId,
+      "UBAH_STATUS_PESANAN",
+      pesananId,
+      input.catatan ?? `Status diubah jadi ${input.status}`
+    );
+    await buatNotifikasi(tx, pesanan.customerId, pesananId, pesanNotif, "STATUS_PESANAN");
+    return { berhasil: true };
+  });
+
+  await kirimNotifikasiWa(pesanan.customer.noWa, pesanNotif);
+
+  return hasil;
+}
+
+/** Lazy-create, 1-1 dengan Pesanan — pola sama seperti getOrBuatKeranjang di lib/keranjang.ts. */
+async function getOrBuatPengiriman(pesananId: string) {
+  const ada = await prisma.pengiriman.findUnique({ where: { pesananId } });
+  if (ada) return ada;
+
+  try {
+    return await prisma.pengiriman.create({ data: { pesananId } });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      const punyaOrang = await prisma.pengiriman.findUnique({ where: { pesananId } });
+      if (punyaOrang) return punyaOrang;
+    }
+    throw err;
+  }
+}
+
+export async function updatePengiriman(pesananId: string, input: UpdatePengirimanInput) {
+  const pesanan = await prisma.pesanan.findUnique({ where: { id: pesananId } });
+  if (!pesanan) throw new PesananError("Pesanan tidak ditemukan", 404);
+
+  const pengiriman = await getOrBuatPengiriman(pesananId);
+
+  return prisma.pengiriman.update({
+    where: { id: pengiriman.id },
+    data: {
+      ...(input.kurir !== undefined && { kurir: input.kurir }),
+      ...(input.noResi !== undefined && { noResi: input.noResi }),
+      ...(input.statusKirim !== undefined && { statusKirim: input.statusKirim }),
+      ...(input.estimasiTiba !== undefined && { estimasiTiba: input.estimasiTiba }),
+    },
+  });
 }

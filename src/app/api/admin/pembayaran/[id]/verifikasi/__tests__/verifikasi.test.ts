@@ -36,6 +36,8 @@ function pembayaranDasar() {
     pesananId: "pesanan_1",
     pesanan: {
       noInvoice: "INV-1",
+      customerId: "cust_1",
+      customer: { noWa: "6281234567890" },
       item: [{ produkId: "produk_1", produkVarianId: null, jumlah: 2 }],
     },
   };
@@ -105,6 +107,7 @@ test("PATCH verifikasi TERVERIFIKASI: pesanan pindah status DIPROSES_ADMIN, stok
           return {};
         },
       },
+      notifikasi: { create: async () => ({}) },
     });
 
   const req = new NextRequest("http://localhost/api/admin/pembayaran/bayar_1/verifikasi", {
@@ -141,6 +144,7 @@ test("PATCH verifikasi DITOLAK: stok DIKEMBALIKAN, pesanan TIDAK diubah statusny
         },
       },
       logAktivitas: { create: async () => ({}) },
+      notifikasi: { create: async () => ({}) },
     });
 
   const req = new NextRequest("http://localhost/api/admin/pembayaran/bayar_1/verifikasi", {

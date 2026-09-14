@@ -3,6 +3,7 @@ import { Prisma, StatusPesanan, StatusPembayaran } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { kurangiStokAtomik, kembalikanStok } from "@/lib/stok";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
+import { buatNotifikasi, kirimNotifikasiWa } from "@/lib/notifikasi";
 import { AppError } from "@/lib/http-error";
 import type { UploadBuktiInput } from "@/lib/validasi";
 
@@ -145,14 +146,21 @@ export async function verifikasiPembayaran(
 ) {
   const pembayaran = await prisma.pembayaran.findUnique({
     where: { id: pembayaranId },
-    include: { pesanan: { include: { item: true } } },
+    include: {
+      pesanan: { include: { item: true, customer: { select: { noWa: true, nama: true } } } },
+    },
   });
   if (!pembayaran) {
     throw new PembayaranError("Pembayaran tidak ditemukan", 404);
   }
 
-  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const hasil = await tx.pembayaran.updateMany({
+  const diterima = input.status === StatusPembayaran.TERVERIFIKASI;
+  const pesanNotif = diterima
+    ? `Pembayaran untuk pesanan ${pembayaran.pesanan.noInvoice} sudah diverifikasi, pesananmu sedang diproses.`
+    : `Pembayaran untuk pesanan ${pembayaran.pesanan.noInvoice} ditolak: ${input.catatanAdmin}. Silakan ajukan pembayaran ulang.`;
+
+  const hasil = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const hasilUpdate = await tx.pembayaran.updateMany({
       where: { id: pembayaranId, status: StatusPembayaran.MENUNGGU_VERIFIKASI },
       data: {
         status: input.status,
@@ -162,7 +170,7 @@ export async function verifikasiPembayaran(
       },
     });
 
-    if (hasil.count === 0) {
+    if (hasilUpdate.count === 0) {
       throw new PembayaranError(
         "Pembayaran ini sudah diproses sebelumnya (atau kadaluarsa duluan), tidak bisa diverifikasi lagi",
         409
@@ -193,8 +201,16 @@ export async function verifikasiPembayaran(
       input.catatanAdmin ?? `Pembayaran untuk pesanan ${pembayaran.pesanan.noInvoice}`
     );
 
+    await buatNotifikasi(tx, pembayaran.pesanan.customerId, pembayaran.pesananId, pesanNotif, "PEMBAYARAN");
+
     return { berhasil: true };
   });
+
+  // WA di LUAR/SETELAH transaksi (prinsip README) — kalau gagal kirim, tidak
+  // boleh menggagalkan verifikasi yang secara data sudah berhasil.
+  await kirimNotifikasiWa(pembayaran.pesanan.customer.noWa, pesanNotif);
+
+  return hasil;
 }
 
 /**

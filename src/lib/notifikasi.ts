@@ -1,4 +1,25 @@
+// letak: src/lib/notifikasi.ts
+import type { Prisma } from "@prisma/client";
+
 const FONNTE_API_URL = "https://api.fonnte.com/send";
+
+/**
+ * Simpan notifikasi in-app ke tabel Notifikasi. WAJIB dipanggil di DALAM
+ * prisma.$transaction yang sama dengan aksi pemicunya (verifikasi
+ * pembayaran, review PO, ubah status pesanan, tindak lanjut komplain) —
+ * beda dari kirimNotifikasiWa yang justru WAJIB di luar/setelah transaksi.
+ * Ini murni tulis DB, bukan panggilan eksternal, jadi aman ikut atomik.
+ */
+export function buatNotifikasi(
+  tx: Prisma.TransactionClient,
+  customerId: string,
+  pesananId: string | null,
+  pesan: string,
+  tipe: string
+) {
+  return tx.notifikasi.create({ data: { customerId, pesananId, pesan, tipe } });
+}
+
 
 /**
  * Kirim pesan WA via Fonnte.

@@ -68,9 +68,14 @@ src/
 
 ## Status pengerjaan
 
-✅ Selesai: skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori (admin CRUD + publik), keranjang, alamat, pesanan + pembayaran manual lengkap (checkout, upload bukti, retry, verifikasi admin, cron kedaluwarsa), **custom PO (ajukan → review admin → konversi otomatis jadi Pesanan)**.
+✅ Selesai (semua modul inti sesuai urutan prioritas di spesifikasi § 5): skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori, keranjang, alamat, pesanan + pembayaran manual lengkap (checkout, upload bukti, retry, verifikasi admin, cron kedaluwarsa), pipeline status pesanan + biaya + pengiriman (admin), custom PO (ajukan → review admin → konversi otomatis jadi Pesanan), upload file (presigned URL R2), notifikasi (list + tandai dibaca), komplain (ajukan customer + tindak lanjut admin), **statistik dashboard admin**.
 
-🚧 Sedang dikerjakan: upload file, notifikasi WA, komplain, statistik dashboard admin, endpoint admin untuk isi biaya jasa titip/ongkir domestik.
+⏳ Belum dikerjakan (sesuai catatan asli di spesifikasi, tidak menghalangi jalan):
+- Testing otomatis untuk lingkungan dengan Postgres/Redis asli (yang ada sekarang: unit + integration test dengan mock, tanpa DB asli — lihat catatan testing di tiap bagian modul)
+- CI/CD
+- Page-view tracking untuk statistik "viewer"
+- Optimisasi kurs terpusat (masih per-produk)
+- Kalkulator tarif jasa titip/ongkir otomatis (saat ini diisi manual admin lewat `PATCH /api/admin/pesanan/[id]/biaya`)
 
 ⏳ Belum dikerjakan (tidak menghalangi jalan, bisa menyusul):
 - Validasi terstruktur pakai Zod (saat ini validasi manual per endpoint)
@@ -248,6 +253,41 @@ Endpoint yang sudah jadi (semua butuh login **customer**):
 - Tidak ada status "customer menolak penawaran" yang terpisah dari "admin menolak PO" — dua-duanya berakhir di `DITOLAK` yang sama (skema cuma punya 4 status, sesuai spesifikasi bisnis asli).
 
 **Testing**: 16 test baru (87 total) — termasuk verifikasi perhitungan `subtotalProduk`/`totalAkhir` yang benar saat konversi, dan guard atomik di kedua arah (review & respon).
+
+> **Bugfix pasca-rilis modul ini**: `responPenawaran` sempat kirim `preferensiKurir`/`metode` yang secara tipe statis `string | undefined` ke Prisma (field itu wajib non-null di schema) — lolos di verifikasi sandbox karena `Prisma.TransactionClient` di-stub sebagai `any` di sana, ketahuan begitu `prisma generate` jalan beneran di mesin developer. Diperbaiki dengan guard eksplisit setelah destructuring (sekalian jadi jaring pengaman runtime, bukan cuma akal-akalan tipe). Sudah diaudit: semua pola Zod `.refine()` conditional-required lain di codebase ini aman karena field targetnya di Prisma schema memang nullable.
+
+## Modul: Upload, Notifikasi, Komplain
+
+| Endpoint | Auth | Catatan |
+|---|---|---|
+| `POST /api/upload` | Siapapun yang login | Presigned URL R2 (customer & admin sama-sama butuh — bukti transfer, foto komplain, referensi PO, foto produk) |
+| `GET /api/notifikasi` | Customer | List + `jumlahBelumDibaca` |
+| `PATCH /api/notifikasi/tandai-baca` | Customer | Sebagian (`notifikasiIds`) atau semua |
+| `POST /api/komplain` | Customer | Ajukan, ownership dicek lewat `PesananItem → Pesanan.customerId` |
+| `GET /api/komplain` / `GET /api/komplain/[id]` | Customer | Riwayat & detail (+ `KomplainLog`) |
+| `GET /api/admin/komplain` | Admin | List, default filter belum `SELESAI` |
+| `PATCH /api/admin/komplain/[id]` | Admin (OWNER/STAFF) | Tindak lanjut |
+
+**Keputusan desain penting:**
+- **Upload** pakai `wajibLogin` (bukan `wajibCustomer`/`wajibAdmin`) — dua-duanya perlu upload file. `lib/r2.ts` bikin presigned PUT URL (5 menit) supaya client upload LANGSUNG ke R2 dari browser, server tidak pernah nyentuh isi filenya sama sekali.
+- **Notifikasi**: `tandaiBaca` SELALU nge-scope `where` ke `customerId` dari token lebih dulu, baru filter `id` opsional — dites eksplisit bahwa nyelipin ID notifikasi customer lain di body tidak akan pernah ke-update baris itu (Prisma AND-kan semua kondisi `where`).
+- **Komplain**: tidak punya kolom `customerId` langsung di tabel-nya — ownership selalu dicek lewat rantai relasi `pesananItem.pesanan.customerId`. `tindakLanjutKomplain` pakai guard `status: { not: SELESAI }` — komplain yang sudah ditutup tidak bisa ditindaklanjuti lagi (harus ajukan baru kalau ada masalah susulan). Tiap tindak lanjut selalu nambah baris `KomplainLog` (riwayat bertahap) terpisah dari `solusi` (keputusan akhir).
+
+**Testing**: 13 test baru (105 total).
+
+## Modul: Admin Pesanan & Dashboard (penutup)
+
+| Endpoint | Catatan |
+|---|---|
+| `GET /api/admin/pesanan` / `GET /api/admin/pesanan/[id]` | List + detail lengkap (tanpa ownership check — admin lihat pesanan siapapun) |
+| `PATCH /api/admin/pesanan/[id]/biaya` | Isi `biayaJasaTitip`/`ongkirDomestik` (di-set 0 saat checkout), `totalAkhir` dihitung ULANG server-side |
+| `PATCH /api/admin/pesanan/[id]/status` | Ubah status pipeline, guard: pesanan status TERMINAL (SELESAI/DIBATALKAN) tidak bisa diubah lagi, selalu nambah `PesananStatusLog` |
+| `PATCH /api/admin/pesanan/[id]/pengiriman` | Realisasi kurir/resi, `Pengiriman` lazy-create (pola sama seperti `Keranjang`) |
+| `GET /api/admin/dashboard/statistik` | Pesanan per status, yang perlu perhatian (pembayaran/PO/komplain), produk aktif, omzet |
+
+**Testing**: 10 test baru (115 total, final).
+
+> **Fix pasca-rilis**: ditemukan sambil menyiapkan pengujian end-to-end — tidak ada satu pun kode yang benar-benar mengisi tabel `Notifikasi` (modul notifikasi cuma bisa baca, tidak ada yang menulis). Ditambahkan `lib/notifikasi.ts` § `buatNotifikasi()` (in-app, ditulis DI DALAM transaksi) dipanggil di 4 titik pemicu: verifikasi/tolak pembayaran, review PO, ubah status pesanan, tindak lanjut komplain — masing-masing juga langsung kirim WA (`kirimNotifikasiWa`, DI LUAR transaksi, sesuai prinsip #1).
 
 ## Prinsip penting yang diikuti di seluruh kode
 

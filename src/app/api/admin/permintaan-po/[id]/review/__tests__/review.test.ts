@@ -54,7 +54,12 @@ test("PATCH review PO tidak ditemukan ditolak 404", async () => {
 
 test("PATCH review ditolak 409 kalau sudah pernah direview (guard atomik)", async () => {
   fakePrisma.permintaanPo = {
-    findUnique: async () => ({ id: "po_1", status: "DIKONFIRMASI_HARGA" }),
+    findUnique: async () => ({
+      id: "po_1",
+      status: "DIKONFIRMASI_HARGA",
+      customerId: "cust_1",
+      customer: { noWa: "6281234567890" },
+    }),
   };
   fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
     fn({ permintaanPo: { updateMany: async () => ({ count: 0 }) } });
@@ -72,7 +77,14 @@ test("PATCH review DIKONFIRMASI_HARGA berhasil, tercatat di LogAktivitas", async
   let dataUpdate: Record<string, unknown> | undefined;
   let logDibuat: Record<string, unknown> | undefined;
 
-  fakePrisma.permintaanPo = { findUnique: async () => ({ id: "po_1", status: "MENUNGGU_REVIEW" }) };
+  fakePrisma.permintaanPo = {
+    findUnique: async () => ({
+      id: "po_1",
+      status: "MENUNGGU_REVIEW",
+      customerId: "cust_1",
+      customer: { noWa: "6281234567890" },
+    }),
+  };
   fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
     fn({
       permintaanPo: {
@@ -87,6 +99,7 @@ test("PATCH review DIKONFIRMASI_HARGA berhasil, tercatat di LogAktivitas", async
           return {};
         },
       },
+      notifikasi: { create: async () => ({}) },
     });
 
   const req = new NextRequest("http://localhost/api/admin/permintaan-po/po_1/review", {

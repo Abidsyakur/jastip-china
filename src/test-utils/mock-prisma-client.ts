@@ -11,6 +11,16 @@
 // secara terpisah di tiap test file (lihat contoh di
 // src/app/api/admin/produk/__tests__/produk-admin.test.ts).
 //
+// JEBAKAN LAIN yang sempat kejadian: route yang TIDAK query DB sama sekali
+// (mis. /api/upload) tetap bisa butuh mock "@/lib/db" — kalau dia import
+// `wajibLogin`/`wajibCustomer`/`wajibAdmin` dari barrel "@/lib/auth", barrel
+// itu ikut me-load sesi.ts & reset-token.ts yang keduanya import "@/lib/db"
+// transitif. Kalau lupa mock, errornya "PrismaClient is not a constructor"
+// dan gampang bikin bingung karena kelihatannya route itu tidak menyentuh DB
+// sama sekali. Aturan praktis: SETIAP test yang mengimpor apa pun dari
+// "@/lib/auth" (langsung atau tidak) WAJIB mock "@/lib/db" juga, minimal
+// dengan `{ prisma: {} }` kosong kalau memang tidak dipakai route-nya.
+//
 // POLA YANG BENAR (penting, sempat salah dan makan waktu debug):
 //   1. mock.module("@/lib/db", { namedExports: { prisma: fakePrisma } })
 //      SEKALI SAJA di `before()`, dengan fakePrisma = objek mutable kosong.
@@ -68,10 +78,6 @@ export const ENUM_MOCK = {
     DIKONFIRMASI_HARGA: "DIKONFIRMASI_HARGA",
     DITOLAK: "DITOLAK",
     SUDAH_JADI_PESANAN: "SUDAH_JADI_PESANAN",
-  },
-  StatuspreferensiKurir: {
-    REGULER: "REGULER",
-    
   },
   StatusPesanan: {
     MENUNGGU_PEMBAYARAN: "MENUNGGU_PEMBAYARAN",

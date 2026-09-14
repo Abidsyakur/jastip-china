@@ -2,6 +2,7 @@
 import { Prisma, StatusKomplain } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
+import { buatNotifikasi, kirimNotifikasiWa } from "@/lib/notifikasi";
 import { AppError } from "@/lib/http-error";
 import type { AjukanKomplainInput, TindakLanjutKomplainInput } from "@/lib/validasi";
 
@@ -49,16 +50,26 @@ export async function tindakLanjutKomplain(
   komplainId: string,
   input: TindakLanjutKomplainInput
 ) {
-  const komplain = await prisma.komplain.findUnique({ where: { id: komplainId } });
+  const komplain = await prisma.komplain.findUnique({
+    where: { id: komplainId },
+    include: {
+      pesananItem: { include: { pesanan: { include: { customer: { select: { noWa: true } } } } } },
+    },
+  });
   if (!komplain) throw new KomplainError("Komplain tidak ditemukan", 404);
 
-  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const hasil = await tx.komplain.updateMany({
+  const customerId = komplain.pesananItem.pesanan.customerId;
+  const noWaCustomer = komplain.pesananItem.pesanan.customer.noWa;
+  const pesananId = komplain.pesananItem.pesananId;
+  const pesanNotif = `Komplainmu ada perkembangan: ${input.catatan}`;
+
+  const hasil = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const hasilUpdate = await tx.komplain.updateMany({
       where: { id: komplainId, status: { not: StatusKomplain.SELESAI } },
       data: { status: input.status, solusi: input.solusi },
     });
 
-    if (hasil.count === 0) {
+    if (hasilUpdate.count === 0) {
       throw new KomplainError("Komplain ini sudah SELESAI, tidak bisa ditindaklanjuti lagi", 409);
     }
 
@@ -68,6 +79,12 @@ export async function tindakLanjutKomplain(
 
     await catatLogAktivitas(tx, adminId, "TINDAK_LANJUT_KOMPLAIN", komplainId, input.catatan);
 
+    await buatNotifikasi(tx, customerId, pesananId, pesanNotif, "KOMPLAIN");
+
     return { berhasil: true };
   });
+
+  await kirimNotifikasiWa(noWaCustomer, pesanNotif);
+
+  return hasil;
 }

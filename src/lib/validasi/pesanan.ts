@@ -1,7 +1,7 @@
 // letak: src/lib/validasi/pesanan.ts
 import { z } from "zod";
 import { StatusPesanan } from "@prisma/client";
-import { cuidSchema } from "./common";
+import { cuidSchema, paginationSchema, uangSchema } from "./common";
 
 // POST /api/pesanan — checkout, item dipilih sebagian dari keranjang.
 // Langsung bikin percobaan pembayaran pertama sekalian (lihat lib/stok.ts +
@@ -23,3 +23,29 @@ export const updateStatusPesananSchema = z.object({
   catatan: z.string().trim().max(500).optional(),
 });
 export type UpdateStatusPesananInput = z.infer<typeof updateStatusPesananSchema>;
+
+// PATCH /api/admin/pesanan/[id]/biaya — admin isi biaya yang di-set 0 saat
+// checkout (belum ada kalkulator tarif, lihat modul Pesanan & Pembayaran).
+// totalAkhir dihitung ULANG server-side dari sini, tidak diterima dari client.
+export const updateBiayaSchema = z.object({
+  biayaJasaTitip: uangSchema,
+  ongkirDomestik: uangSchema,
+  biayaAdminPayment: uangSchema.optional(),
+});
+export type UpdateBiayaInput = z.infer<typeof updateBiayaSchema>;
+
+// PATCH /api/admin/pesanan/[id]/pengiriman — realisasi pengiriman (beda dari
+// preferensiKurir yang cuma preferensi customer saat checkout)
+export const updatePengirimanSchema = z.object({
+  kurir: z.string().trim().max(50).optional(),
+  noResi: z.string().trim().max(100).optional(),
+  statusKirim: z.string().trim().min(1).max(50).optional(),
+  estimasiTiba: z.coerce.date().optional(),
+});
+export type UpdatePengirimanInput = z.infer<typeof updatePengirimanSchema>;
+
+// GET /api/admin/pesanan — list untuk panel admin
+export const pesananAdminQuerySchema = paginationSchema.extend({
+  status: z.nativeEnum(StatusPesanan).optional(),
+});
+export type PesananAdminQuery = z.infer<typeof pesananAdminQuerySchema>;

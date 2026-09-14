@@ -2,6 +2,7 @@
 import { Prisma, PermintaanPoStatus, StatusPesanan, StatusPembayaran, SumberItem } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
+import { buatNotifikasi, kirimNotifikasiWa } from "@/lib/notifikasi";
 import { buatNoInvoice } from "@/lib/no-invoice";
 import { AppError } from "@/lib/http-error";
 import type { AjukanPoInput, ReviewPoInput, ResponPenawaranInput } from "@/lib/validasi";
@@ -34,11 +35,19 @@ export function ajukanPo(customerId: string, input: AjukanPoInput) {
  * ajukan ulang di ID yang sama, walau praktis mustahil), update 0 baris.
  */
 export async function reviewPo(adminId: string, poId: string, input: ReviewPoInput) {
-  const po = await prisma.permintaanPo.findUnique({ where: { id: poId } });
+  const po = await prisma.permintaanPo.findUnique({
+    where: { id: poId },
+    include: { customer: { select: { noWa: true } } },
+  });
   if (!po) throw new PermintaanPoError("Permintaan PO tidak ditemukan", 404);
 
-  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const hasil = await tx.permintaanPo.updateMany({
+  const dikonfirmasi = input.status === "DIKONFIRMASI_HARGA";
+  const pesanNotif = dikonfirmasi
+    ? `Permintaan PO-mu sudah direview: harga ${input.estimasiHarga}/unit + ongkir ${input.estimasiOngkir}. Cek & tanggapi di aplikasi.`
+    : `Permintaan PO-mu ditolak: ${input.catatanAdmin}`;
+
+  const hasil = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const hasilUpdate = await tx.permintaanPo.updateMany({
       where: { id: poId, status: PermintaanPoStatus.MENUNGGU_REVIEW },
       data: {
         status: input.status,
@@ -50,7 +59,7 @@ export async function reviewPo(adminId: string, poId: string, input: ReviewPoInp
       },
     });
 
-    if (hasil.count === 0) {
+    if (hasilUpdate.count === 0) {
       throw new PermintaanPoError("Permintaan PO ini sudah direview sebelumnya", 409);
     }
 
@@ -64,8 +73,16 @@ export async function reviewPo(adminId: string, poId: string, input: ReviewPoInp
         : `PO ditolak: ${input.catatanAdmin}`
     );
 
+    // PermintaanPo belum tentu punya Pesanan (baru dibuat kalau customer
+    // setuju penawaran nanti) -- pesananId di notifikasi ini null.
+    await buatNotifikasi(tx, po.customerId, null, pesanNotif, "PERMINTAAN_PO");
+
     return { berhasil: true };
   });
+
+  await kirimNotifikasiWa(po.customer.noWa, pesanNotif);
+
+  return hasil;
 }
 
 /**

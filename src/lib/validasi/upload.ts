@@ -1,3 +1,4 @@
+// letak: src/lib/validasi/upload.ts
 import { z } from "zod";
 
 const TIPE_FILE_DIIZINKAN = ["image/jpeg", "image/png", "image/webp"] as const;
