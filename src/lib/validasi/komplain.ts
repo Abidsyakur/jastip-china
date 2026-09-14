@@ -1,6 +1,7 @@
+// letak: src/lib/validasi/komplain.ts
 import { z } from "zod";
 import { AlasanKomplain, SolusiKomplain, StatusKomplain } from "@prisma/client";
-import { cuidSchema } from "./common";
+import { cuidSchema, paginationSchema } from "./common";
 
 // POST /api/komplain — customer ajukan komplain atas satu item pesanan
 export const ajukanKomplainSchema = z.object({
@@ -24,3 +25,10 @@ export const tindakLanjutKomplainSchema = z
     path: ["solusi"],
   });
 export type TindakLanjutKomplainInput = z.infer<typeof tindakLanjutKomplainSchema>;
+
+// GET /api/admin/komplain — list untuk panel admin, default tampilkan yang
+// belum SELESAI kalau status tidak difilter eksplisit
+export const komplainAdminQuerySchema = paginationSchema.extend({
+  status: z.nativeEnum(StatusKomplain).optional(),
+});
+export type KomplainAdminQuery = z.infer<typeof komplainAdminQuerySchema>;

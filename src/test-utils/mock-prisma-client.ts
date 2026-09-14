@@ -69,6 +69,10 @@ export const ENUM_MOCK = {
     DITOLAK: "DITOLAK",
     SUDAH_JADI_PESANAN: "SUDAH_JADI_PESANAN",
   },
+  StatuspreferensiKurir: {
+    REGULER: "REGULER",
+    
+  },
   StatusPesanan: {
     MENUNGGU_PEMBAYARAN: "MENUNGGU_PEMBAYARAN",
     DIPROSES_ADMIN: "DIPROSES_ADMIN",

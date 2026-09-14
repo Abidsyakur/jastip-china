@@ -68,9 +68,9 @@ src/
 
 ## Status pengerjaan
 
-✅ Selesai: skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori (admin CRUD + publik), keranjang, alamat, **pesanan + pembayaran manual lengkap** (checkout, upload bukti, retry, verifikasi admin, cron kedaluwarsa).
+✅ Selesai: skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori (admin CRUD + publik), keranjang, alamat, pesanan + pembayaran manual lengkap (checkout, upload bukti, retry, verifikasi admin, cron kedaluwarsa), **custom PO (ajukan → review admin → konversi otomatis jadi Pesanan)**.
 
-🚧 Sedang dikerjakan: custom PO, upload file, notifikasi WA, komplain, statistik dashboard admin, endpoint admin untuk isi biaya jasa titip/ongkir.
+🚧 Sedang dikerjakan: upload file, notifikasi WA, komplain, statistik dashboard admin, endpoint admin untuk isi biaya jasa titip/ongkir domestik.
 
 ⏳ Belum dikerjakan (tidak menghalangi jalan, bisa menyusul):
 - Validasi terstruktur pakai Zod (saat ini validasi manual per endpoint)
@@ -226,6 +226,28 @@ Endpoint yang sudah jadi (semua butuh login **customer**):
 **Refactor kecil**: `AppError` (di `lib/http-error.ts`) jadi base class generik untuk `CheckoutError`/`PembayaranError` — route handler cukup satu `tanganiAppError()`, tidak perlu daftar `instanceof` yang tambah panjang tiap modul baru.
 
 **Testing**: 29 test baru (71 total) — termasuk simulasi race cron-vs-admin yang eksplisit (satu kandidat "menang", satu "kalah", stok cuma dikembalikan untuk yang menang).
+
+## Modul: Custom PO
+
+| Endpoint | Auth | Catatan |
+|---|---|---|
+| `POST /api/permintaan-po` | Customer | Ajukan barang custom di luar katalog |
+| `GET /api/permintaan-po` | Customer | Riwayat pengajuan sendiri |
+| `GET /api/permintaan-po/[id]` | Customer | Detail (ownership check) |
+| `PATCH /api/permintaan-po/[id]/respon` | Customer | Setuju/tolak penawaran harga admin |
+| `GET /api/admin/permintaan-po` | Admin | List, default filter `MENUNGGU_REVIEW` |
+| `PATCH /api/admin/permintaan-po/[id]/review` | Admin (OWNER/STAFF) | Kasih harga atau tolak |
+
+**Alur (`lib/permintaan-po.ts`):** ajukan (`MENUNGGU_REVIEW`) → admin `reviewPo` kasih `estimasiHarga`+`estimasiOngkir` (`DIKONFIRMASI_HARGA`) atau tolak (`DITOLAK`) → customer `responPenawaran`: kalau **setuju**, LANGSUNG dikonversi jadi `Pesanan` + `PesananItem` (`sumberItem: CUSTOM_PO`) + `Pembayaran` pertama dalam satu transaksi (skip keranjang sepenuhnya, sesuai spesifikasi bisnis); kalau **tolak**, status jadi `DITOLAK`.
+
+**Keputusan desain penting:**
+- `estimasiHarga` diperlakukan sebagai **harga per unit** (konsisten dengan `Produk.hargaJualIdr`), dikalikan `jumlahDiminta` saat dikonversi jadi `subtotalProduk`. `estimasiOngkir` langsung jadi `ongkirChinaGudang` pesanan (nilai ini sudah ada dari hasil review admin, beda dari checkout katalog yang semua ongkirnya masih 0). `ongkirDomestik` tetap 0 (diisi manual admin belakangan, sama seperti checkout biasa).
+- **Approve PO butuh `alamatId`+`preferensiKurir`+`metode`** di body (`responPenawaranSchema` pakai `.refine()` supaya field ini wajib HANYA kalau `setuju: true`) — karena approve = checkout instan, butuh info yang sama seperti checkout katalog.
+- Guard atomik dipakai LAGI di sini persis pola yang sama seperti modul pembayaran (`WHERE status = <status lama>`) — baik di `reviewPo` (cegah direview dobel) maupun `responPenawaran` (cegah direspon dobel oleh customer, atau setelah admin somehow ubah lagi).
+- Custom PO **tidak** melewati guard stok (`lib/stok.ts`) — barang ini di luar katalog, tidak ada baris `Produk`/`ProdukVarian` untuk dijaga.
+- Tidak ada status "customer menolak penawaran" yang terpisah dari "admin menolak PO" — dua-duanya berakhir di `DITOLAK` yang sama (skema cuma punya 4 status, sesuai spesifikasi bisnis asli).
+
+**Testing**: 16 test baru (87 total) — termasuk verifikasi perhitungan `subtotalProduk`/`totalAkhir` yang benar saat konversi, dan guard atomik di kedua arah (review & respon).
 
 ## Prinsip penting yang diikuti di seluruh kode
 
