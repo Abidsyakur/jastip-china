@@ -9,7 +9,12 @@ import { cuidSchema, paginationSchema, uangSchema } from "./common";
 export const checkoutSchema = z.object({
   alamatId: cuidSchema,
   keranjangItemIds: z.array(cuidSchema).min(1, "Pilih minimal 1 item untuk checkout"),
-  preferensiKurir: z.string().trim().min(1, "Preferensi kurir wajib diisi").max(50),
+  // Dibatasi ketat (bukan bebas teks lagi) -- dipakai langsung sebagai kunci
+  // tarif di lib/tarif.ts § hitungOngkirDomestik, tidak ada kurir lain yang
+  // didukung untuk sekarang.
+  preferensiKurir: z.enum(["jnt", "shopee_express"], {
+    errorMap: () => ({ message: "Kurir cuma bisa jnt atau shopee_express untuk sekarang" }),
+  }),
   metode: z.string().trim().min(1, "Metode pembayaran wajib diisi").max(50),
 });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
@@ -27,8 +32,13 @@ export type UpdateStatusPesananInput = z.infer<typeof updateStatusPesananSchema>
 // PATCH /api/admin/pesanan/[id]/biaya — admin isi biaya yang di-set 0 saat
 // checkout (belum ada kalkulator tarif, lihat modul Pesanan & Pembayaran).
 // totalAkhir dihitung ULANG server-side dari sini, tidak diterima dari client.
+// PATCH /api/admin/pesanan/[id]/biaya — biayaJasaTitip & ongkirDomestik sekarang
+// sudah dihitung OTOMATIS saat checkout (lib/tarif.ts), field ini di sini jadi
+// override manual (kalau admin perlu koreksi kasus khusus). ongkirChinaGudang
+// TETAP cuma bisa diisi manual di sini -- belum ada kalkulatornya.
 export const updateBiayaSchema = z.object({
   biayaJasaTitip: uangSchema,
+  ongkirChinaGudang: uangSchema,
   ongkirDomestik: uangSchema,
   biayaAdminPayment: uangSchema.optional(),
 });

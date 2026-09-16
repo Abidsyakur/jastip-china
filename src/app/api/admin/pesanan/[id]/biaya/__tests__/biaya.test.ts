@@ -46,7 +46,7 @@ test("PATCH biaya pesanan tidak ditemukan ditolak 404", async () => {
   const req = new NextRequest("http://localhost/api/admin/pesanan/pesanan_x/biaya", {
     method: "PATCH",
     headers: { "Content-Type": "application/json", cookie: await cookieAdmin() },
-    body: JSON.stringify({ biayaJasaTitip: 10000, ongkirDomestik: 15000 }),
+    body: JSON.stringify({ biayaJasaTitip: 10000, ongkirChinaGudang: 5000, ongkirDomestik: 15000 }),
   });
   const res = await PATCH(req, konteks("pesanan_x"));
   assert.equal(res.status, 404);
@@ -59,7 +59,6 @@ test("PATCH biaya menghitung ulang totalAkhir = subtotalProduk + jasaTitip + ong
     findUnique: async () => ({
       id: "pesanan_1",
       subtotalProduk: 200000,
-      ongkirChinaGudang: 20000, // sudah ada dari sebelumnya (mis. dari custom PO)
       biayaAdminPayment: 0,
     }),
     update: async (args: { data: Record<string, unknown> }) => {
@@ -71,7 +70,7 @@ test("PATCH biaya menghitung ulang totalAkhir = subtotalProduk + jasaTitip + ong
   const req = new NextRequest("http://localhost/api/admin/pesanan/pesanan_1/biaya", {
     method: "PATCH",
     headers: { "Content-Type": "application/json", cookie: await cookieAdmin() },
-    body: JSON.stringify({ biayaJasaTitip: 25000, ongkirDomestik: 15000 }),
+    body: JSON.stringify({ biayaJasaTitip: 25000, ongkirChinaGudang: 20000, ongkirDomestik: 15000 }),
   });
   const res = await PATCH(req, konteks());
 
@@ -79,5 +78,6 @@ test("PATCH biaya menghitung ulang totalAkhir = subtotalProduk + jasaTitip + ong
   // 200000 + 25000 + 20000 + 15000 + 0 = 260000
   assert.equal(dataUpdate?.totalAkhir, 260000);
   assert.equal(dataUpdate?.biayaJasaTitip, 25000);
+  assert.equal(dataUpdate?.ongkirChinaGudang, 20000);
   assert.equal(dataUpdate?.ongkirDomestik, 15000);
 });

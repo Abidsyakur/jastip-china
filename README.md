@@ -75,7 +75,7 @@ src/
 - CI/CD
 - Page-view tracking untuk statistik "viewer"
 - Optimisasi kurs terpusat (masih per-produk)
-- Kalkulator tarif jasa titip/ongkir otomatis (saat ini diisi manual admin lewat `PATCH /api/admin/pesanan/[id]/biaya`)
+- Kalkulator tarif ongkir China→gudang otomatis (saat ini masih diisi manual admin lewat `PATCH /api/admin/pesanan/[id]/biaya`; `biayaJasaTitip` & `ongkirDomestik` **sudah otomatis** sejak update `lib/tarif.ts`)
 
 ⏳ Belum dikerjakan (tidak menghalangi jalan, bisa menyusul):
 - Validasi terstruktur pakai Zod (saat ini validasi manual per endpoint)
@@ -208,7 +208,22 @@ Endpoint yang sudah jadi (semua butuh login **customer**):
 4. **Dalam satu `$transaction`**: untuk tiap item — hitung harga snapshot, jalankan guard stok atomik (`lib/stok.ts` § `kurangiStokAtomik`, pola `UPDATE ... WHERE stok >= jumlah`), kalau stok kurang di item MANA PUN → seluruh transaksi batal (tidak ada checkout "separuh berhasil"). Baru setelah semua item lolos: buat `Pesanan` + `PesananItem` (snapshot) + `PesananStatusLog` (`MENUNGGU_PEMBAYARAN`) + `Pembayaran` pertama (`MENUNGGU_BUKTI`), lalu hapus item yang barusan checkout dari `KeranjangItem`.
 5. `noInvoice` di-retry maksimal 3x kalau kebetulan tabrakan (sangat jarang, `@unique` di schema sebagai jaring pengaman akhir).
 
-`biayaJasaTitip`, `ongkirChinaGudang`, `ongkirDomestik` di-set **0 saat checkout** — belum ada kalkulator tarif, diisi manual oleh admin belakangan (keputusan produk). **Belum ada endpoint admin untuk isi biaya ini** — masuk daftar "sedang dikerjakan".
+`biayaJasaTitip` dan `ongkirDomestik` dihitung **OTOMATIS & FINAL saat checkout** (`lib/tarif.ts`) — customer tidak perlu menunggu admin untuk dua komponen ini. `ongkirChinaGudang` tetap **0 saat checkout** — belum ada kalkulatornya (perlu kuotasi forwarder asli), diisi manual admin lewat `PATCH /api/admin/pesanan/[id]/biaya`.
+
+### Bagian 1b — Tarif Checkout (`lib/tarif.ts`)
+
+Dua fungsi murni (tidak ada panggilan jaringan sama sekali), dipanggil langsung di dalam `prosesCheckout`:
+
+- **`hitungBiayaJasaTitip(subtotalProduk)`** — 35% dari subtotal, lantai minimum Rp15.000 (barang murah tetap sepadan menutup effort admin).
+- **`hitungOngkirDomestik(provinsi, kurir, beratTotalKg)`** — berbasis zona provinsi (3 zona: Jawa / Sumatera-Bali-Kalimantan-Sulawesi / Indonesia Timur), pola tarif ekspedisi asli (kg pertama + kg berikutnya, bukan flat linear per kg). Kurir dibatasi `'jnt' | 'shopee_express'` — `checkoutSchema.preferensiKurir` diperketat jadi enum yang sama (sebelumnya bebas teks).
+
+**Keputusan desain penting:**
+- **`Alamat.provinsi` nullable di DB, wajib di Zod** untuk alamat baru (pola sama seperti `Admin.email`) — alamat lama dari sebelum field ini ada tidak langsung invalid, tapi **checkout akan menolak** (400, pesan jelas) kalau `provinsi` masih kosong, karena `hitungOngkirDomestik` butuh itu. Customer perlu update alamatnya dulu.
+- **Provinsi tidak dikenali jatuh ke zona TERMAHAL** (Indonesia Timur) sebagai default — sengaja dipilih supaya risiko finansial (kalau ada input tidak terduga) jatuh ke pihak platform yang rugi tipis, bukan ke arah yang bisa dieksploitasi customer untuk ongkir murah.
+- **`DAFTAR_PROVINSI` di `alamatSchema` diambil langsung dari kunci `PROVINSI_KE_ZONA`** (bukan didaftar ulang manual) — satu sumber kebenaran, tidak bisa telat sinkron antara validasi & kalkulator tarif.
+- **Berat total** dihitung dari `Produk.beratGram × jumlah` per item, dijumlah semua item di keranjang yang di-checkout, dikonversi ke kg sebelum dilempar ke `hitungOngkirDomestik`.
+
+**Testing**: 8 test baru untuk `lib/tarif.ts` (pure function, tidak perlu mock apa pun) — mencakup kasus minimum jasa titip, semua kombinasi 3 zona × 2 kurir, pembulatan berat ke kg penuh, dan fallback provinsi tidak dikenali.
 
 ### Bagian 2 — Pembayaran (retry, verifikasi, kedaluwarsa)
 
@@ -280,7 +295,7 @@ Endpoint yang sudah jadi (semua butuh login **customer**):
 | Endpoint | Catatan |
 |---|---|
 | `GET /api/admin/pesanan` / `GET /api/admin/pesanan/[id]` | List + detail lengkap (tanpa ownership check — admin lihat pesanan siapapun) |
-| `PATCH /api/admin/pesanan/[id]/biaya` | Isi `biayaJasaTitip`/`ongkirDomestik` (di-set 0 saat checkout), `totalAkhir` dihitung ULANG server-side |
+| `PATCH /api/admin/pesanan/[id]/biaya` | Override manual `biayaJasaTitip`/`ongkirChinaGudang`/`ongkirDomestik`, `totalAkhir` dihitung ULANG server-side. Dua yang pertama sudah otomatis dari checkout (`lib/tarif.ts`), field ini untuk koreksi kasus khusus; `ongkirChinaGudang` TETAP cuma bisa diisi manual di sini |
 | `PATCH /api/admin/pesanan/[id]/status` | Ubah status pipeline, guard: pesanan status TERMINAL (SELESAI/DIBATALKAN) tidak bisa diubah lagi, selalu nambah `PesananStatusLog` |
 | `PATCH /api/admin/pesanan/[id]/pengiriman` | Realisasi kurir/resi, `Pengiriman` lazy-create (pola sama seperti `Keranjang`) |
 | `GET /api/admin/dashboard/statistik` | Pesanan per status, yang perlu perhatian (pembayaran/PO/komplain), produk aktif, omzet |

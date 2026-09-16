@@ -66,6 +66,11 @@ model Alamat {
   noTelp        String @map("no_telp")
   alamatLengkap String @map("alamat_lengkap")
   kota          String
+  provinsi      String? // nullable di DB (data lama dari sebelum field ini ada),
+                        // TAPI wajib diisi di Zod untuk alamat baru (lib/validasi/alamat.ts)
+                        // -- pola sama seperti Admin.email. Dibutuhkan lib/tarif.ts untuk
+                        // hitung ongkir domestik; alamat lama tanpa provinsi akan ditolak
+                        // saat dipakai checkout sampai customer update alamatnya.
   kodePos       String @map("kode_pos")
 
   pesanan Pesanan[]

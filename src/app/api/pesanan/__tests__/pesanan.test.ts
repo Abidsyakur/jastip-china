@@ -30,7 +30,7 @@ async function cookieCustomer(sub = "cust_1") {
 const bodyValid = {
   alamatId: "calamat0000000000000001",
   keranjangItemIds: ["citem000000000000000001"],
-  preferensiKurir: "JNE",
+  preferensiKurir: "jnt",
   metode: "transfer_bca",
 };
 
@@ -47,6 +47,7 @@ function itemKeranjangDasar(override: Record<string, unknown> = {}) {
       status: "AKTIF",
       stok: 10,
       hargaJualIdr: 100000,
+      beratGram: 500,
     },
     produkVarian: null,
     ...override,
@@ -76,7 +77,7 @@ test("POST /api/pesanan alamat bukan milik customer ditolak 404", async () => {
 });
 
 test("POST /api/pesanan item keranjang tidak lengkap (ada yang hilang/bukan milik) ditolak 404", async () => {
-  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1" }) };
+  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1", provinsi: "DKI Jakarta" }) };
   fakePrisma.keranjangItem = { findMany: async () => [] }; // kosong, padahal 1 diminta
 
   const req = new NextRequest("http://localhost/api/pesanan", {
@@ -90,7 +91,7 @@ test("POST /api/pesanan item keranjang tidak lengkap (ada yang hilang/bukan mili
 
 test("POST /api/pesanan produk NONAKTIF ditolak 409, transaksi tidak sampai dibuka", async () => {
   let transaksiDibuka = false;
-  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1" }) };
+  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1", provinsi: "DKI Jakarta" }) };
   fakePrisma.keranjangItem = {
     findMany: async () => [itemKeranjangDasar({ produk: { ...itemKeranjangDasar().produk, status: "NONAKTIF" } })],
   };
@@ -111,7 +112,7 @@ test("POST /api/pesanan produk NONAKTIF ditolak 409, transaksi tidak sampai dibu
 
 test("POST /api/pesanan stok tidak cukup ditolak 409, SELURUH transaksi batal (pesanan.create tidak dipanggil)", async () => {
   let pesananDibuat = false;
-  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1" }) };
+  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1", provinsi: "DKI Jakarta" }) };
   fakePrisma.keranjangItem = { findMany: async () => [itemKeranjangDasar({ jumlah: 999 })] };
   fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
     fn({
@@ -144,7 +145,7 @@ test("POST /api/pesanan berhasil: subtotal dihitung benar, stok dikurangi, item 
   let pesananDataDikirim: Record<string, unknown> | undefined;
   let keranjangDihapusDengan: unknown;
 
-  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1" }) };
+  fakePrisma.alamat = { findUnique: async () => ({ id: "calamat0000000000000001", customerId: "cust_1", provinsi: "DKI Jakarta" }) };
   fakePrisma.keranjangItem = { findMany: async () => [itemKeranjangDasar()] }; // jumlah 2, harga 100000
   fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
     fn({
@@ -181,7 +182,10 @@ test("POST /api/pesanan berhasil: subtotal dihitung benar, stok dikurangi, item 
 
   assert.equal(res.status, 201);
   assert.equal(json.pesanan.subtotalProduk, 200000); // 100000 x 2
-  assert.equal(json.pesanan.totalAkhir, 200000); // ongkir/jasa titip masih 0
+  assert.equal(json.pesanan.biayaJasaTitip, 70000); // 35% x 200000
+  assert.equal(json.pesanan.ongkirChinaGudang, 0); // belum ada kalkulatornya, tetap 0
+  assert.equal(json.pesanan.ongkirDomestik, 9000); // DKI Jakarta (zona jawa) + jnt + 1kg (2x500gr) = kgPertama saja
+  assert.equal(json.pesanan.totalAkhir, 279000); // 200000 + 70000 + 0 + 9000
   assert.deepEqual(stokDikurangiDengan, {
     where: { id: "cproduk00000000000000001", stok: { gte: 2 } },
     data: { stok: { decrement: 2 } },

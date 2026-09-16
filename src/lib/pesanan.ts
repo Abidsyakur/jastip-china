@@ -6,6 +6,7 @@ import { buatNoInvoice } from "@/lib/no-invoice";
 import { AppError } from "@/lib/http-error";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
 import { buatNotifikasi, kirimNotifikasiWa } from "@/lib/notifikasi";
+import { hitungBiayaJasaTitip, hitungOngkirDomestik } from "@/lib/tarif";
 import type { CheckoutInput, UpdateBiayaInput, UpdateStatusPesananInput, UpdatePengirimanInput } from "@/lib/validasi";
 
 const JAM_KEDALUWARSA_PEMBAYARAN = Number(process.env.PEMBAYARAN_KEDALUWARSA_JAM ?? 24);
@@ -45,6 +46,15 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
   if (!alamat || alamat.customerId !== customerId) {
     throw new CheckoutError("Alamat tidak ditemukan", 404);
   }
+  if (!alamat.provinsi) {
+    // Alamat lama dari sebelum field provinsi ada (nullable di DB, lihat
+    // schema.prisma) -- tidak bisa dipakai checkout sampai di-update dulu,
+    // karena hitungOngkirDomestik butuh provinsi.
+    throw new CheckoutError(
+      "Alamat ini belum punya provinsi, silakan update alamatnya dulu sebelum checkout",
+      400
+    );
+  }
 
   const items = await prisma.keranjangItem.findMany({
     where: { id: { in: keranjangItemIds }, keranjang: { customerId } },
@@ -69,11 +79,13 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
     try {
       return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         let subtotalProduk = 0;
+        let beratTotalGram = 0;
         const pesananItemData: PesananItemBaru[] = [];
 
         for (const item of items) {
           const hargaSatuan = Number(item.produk.hargaJualIdr) + Number(item.produkVarian?.hargaTambahan ?? 0);
           subtotalProduk += hargaSatuan * item.jumlah;
+          beratTotalGram += item.produk.beratGram * item.jumlah;
 
           const berhasil = await kurangiStokAtomik(tx, item.produkId, item.produkVarianId, item.jumlah);
           if (!berhasil) {
@@ -95,9 +107,13 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
           });
         }
 
-        // ongkir & jasa titip sengaja 0 di sini — keputusan produk: diisi
-        // manual oleh admin belakangan (belum ada kalkulator tarif).
-        const totalAkhir = subtotalProduk;
+        // biayaJasaTitip & ongkirDomestik dihitung OTOMATIS & FINAL di sini
+        // (lib/tarif.ts) -- customer tidak perlu tunggu admin. ongkirChinaGudang
+        // tetap 0, diisi manual admin belakangan (belum ada kalkulatornya).
+        const biayaJasaTitip = hitungBiayaJasaTitip(subtotalProduk);
+        const ongkirChinaGudang = 0;
+        const ongkirDomestik = hitungOngkirDomestik(alamat.provinsi!, preferensiKurir, beratTotalGram / 1000);
+        const totalAkhir = subtotalProduk + biayaJasaTitip + ongkirChinaGudang + ongkirDomestik;
 
         const pesanan = await tx.pesanan.create({
           data: {
@@ -106,9 +122,9 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
             noInvoice: buatNoInvoice(),
             preferensiKurir,
             subtotalProduk,
-            biayaJasaTitip: 0,
-            ongkirChinaGudang: 0,
-            ongkirDomestik: 0,
+            biayaJasaTitip,
+            ongkirChinaGudang,
+            ongkirDomestik,
             totalAkhir,
             item: { create: pesananItemData },
             statusLog: { create: { status: StatusPesanan.MENUNGGU_PEMBAYARAN } },
@@ -172,7 +188,7 @@ export async function updateBiayaPesanan(pesananId: string, input: UpdateBiayaIn
   const totalAkhir =
     Number(pesanan.subtotalProduk) +
     input.biayaJasaTitip +
-    Number(pesanan.ongkirChinaGudang) +
+    input.ongkirChinaGudang +
     input.ongkirDomestik +
     biayaAdminPayment;
 
@@ -180,6 +196,7 @@ export async function updateBiayaPesanan(pesananId: string, input: UpdateBiayaIn
     where: { id: pesananId },
     data: {
       biayaJasaTitip: input.biayaJasaTitip,
+      ongkirChinaGudang: input.ongkirChinaGudang,
       ongkirDomestik: input.ongkirDomestik,
       biayaAdminPayment,
       totalAkhir,

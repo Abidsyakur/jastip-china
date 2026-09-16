@@ -33,6 +33,7 @@ const alamatValid = {
   noTelp: "081234567890",
   alamatLengkap: "Jl. Merdeka No. 10, RT 01 RW 02",
   kota: "Jakarta Selatan",
+  provinsi: "DKI Jakarta",
   kodePos: "12345",
 };
 
