@@ -11,3 +11,4 @@ export * from "./permintaan-po";
 export * from "./komplain";
 export * from "./notifikasi";
 export * from "./upload";
+export * from "./kurs-master";

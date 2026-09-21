@@ -184,7 +184,8 @@ test("POST /api/pesanan berhasil: subtotal dihitung benar, stok dikurangi, item 
   assert.equal(json.pesanan.subtotalProduk, 200000); // 100000 x 2
   assert.equal(json.pesanan.biayaJasaTitip, 70000); // 35% x 200000
   assert.equal(json.pesanan.ongkirChinaGudang, 0); // belum ada kalkulatornya, tetap 0
-  assert.equal(json.pesanan.ongkirDomestik, 9000); // DKI Jakarta (zona jawa) + jnt + 1kg (2x500gr) = kgPertama saja
+  assert.equal(json.pesanan.ongkirDomestik, 9000); // DKI Jakarta (zona jawa) + jnt + 1000gr = kgPertama saja
+  assert.equal(json.pesanan.beratTotalGram, 1000); // 500gr x 2 -- snapshot permanen
   assert.equal(json.pesanan.totalAkhir, 279000); // 200000 + 70000 + 0 + 9000
   assert.deepEqual(stokDikurangiDengan, {
     where: { id: "cproduk00000000000000001", stok: { gte: 2 } },

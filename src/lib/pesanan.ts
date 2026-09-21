@@ -112,7 +112,7 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
         // tetap 0, diisi manual admin belakangan (belum ada kalkulatornya).
         const biayaJasaTitip = hitungBiayaJasaTitip(subtotalProduk);
         const ongkirChinaGudang = 0;
-        const ongkirDomestik = hitungOngkirDomestik(alamat.provinsi!, preferensiKurir, beratTotalGram / 1000);
+        const ongkirDomestik = hitungOngkirDomestik(alamat.provinsi!, preferensiKurir, beratTotalGram);
         const totalAkhir = subtotalProduk + biayaJasaTitip + ongkirChinaGudang + ongkirDomestik;
 
         const pesanan = await tx.pesanan.create({
@@ -125,6 +125,7 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
             biayaJasaTitip,
             ongkirChinaGudang,
             ongkirDomestik,
+            beratTotalGram,
             totalAkhir,
             item: { create: pesananItemData },
             statusLog: { create: { status: StatusPesanan.MENUNGGU_PEMBAYARAN } },
@@ -184,21 +185,21 @@ export async function updateBiayaPesanan(pesananId: string, input: UpdateBiayaIn
   const pesanan = await prisma.pesanan.findUnique({ where: { id: pesananId } });
   if (!pesanan) throw new PesananError("Pesanan tidak ditemukan", 404);
 
-  const biayaAdminPayment = input.biayaAdminPayment ?? Number(pesanan.biayaAdminPayment);
+  // biayaJasaTitip & ongkirDomestik SELALU diambil dari nilai TERSIMPAN
+  // (bukan dihitung ulang, bukan dari input) -- endpoint ini cuma boleh
+  // mengubah ongkirChinaGudang. Dua field lain sudah final & otomatis
+  // sejak checkout (lib/tarif.ts).
   const totalAkhir =
     Number(pesanan.subtotalProduk) +
-    input.biayaJasaTitip +
+    Number(pesanan.biayaJasaTitip) +
     input.ongkirChinaGudang +
-    input.ongkirDomestik +
-    biayaAdminPayment;
+    Number(pesanan.ongkirDomestik) +
+    Number(pesanan.biayaAdminPayment);
 
   return prisma.pesanan.update({
     where: { id: pesananId },
     data: {
-      biayaJasaTitip: input.biayaJasaTitip,
       ongkirChinaGudang: input.ongkirChinaGudang,
-      ongkirDomestik: input.ongkirDomestik,
-      biayaAdminPayment,
       totalAkhir,
     },
   });

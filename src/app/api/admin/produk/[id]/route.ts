@@ -4,8 +4,9 @@ import { Prisma, ProdukStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { parseBody, produkUpdateSchema } from "@/lib/validasi";
 import { wajibAdmin } from "@/lib/auth";
-import { tanganiErrorAuth } from "@/lib/http-error";
+import { tanganiErrorAuth, tanganiAppError } from "@/lib/http-error";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
+import { tentukanKurs, tentukanHargaJualIdr } from "@/lib/produk";
 
 interface Konteks {
   // Next.js 15: params jadi Promise, bukan objek langsung — wajib di-await
@@ -43,6 +44,34 @@ export async function PATCH(req: NextRequest, { params }: Konteks) {
     if ("error" in parsed) return parsed.error;
     const data = parsed.data;
 
+    // hargaJualIdr dihitung ULANG setiap kali salah satu dari
+    // hargaAsalRmb/kurs/hargaJualIdr disentuh di request INI (kecuali kalau
+    // hargaJualIdr eksplisit dikirim -- itu dipakai apa adanya). PATCH yang
+    // sama sekali tidak menyentuh field harga (mis. cuma ganti namaProduk)
+    // TIDAK memicu apa pun di sini. Override manual sebelumnya TIDAK
+    // dipertahankan kalau hargaJualIdr tidak eksplisit dikirim ULANG di
+    // request ini -- keputusan bisnis sengaja, lihat lib/produk.ts.
+    let kursFinal = data.kurs;
+    let hargaJualIdrFinal = data.hargaJualIdr;
+    const sentuhHarga =
+      data.hargaAsalRmb !== undefined || data.kurs !== undefined || data.hargaJualIdr !== undefined;
+
+    if (sentuhHarga) {
+      kursFinal = await tentukanKurs(data.kurs);
+
+      if (data.hargaJualIdr === undefined) {
+        let hargaAsalRmbEfektif = data.hargaAsalRmb;
+        if (hargaAsalRmbEfektif === undefined) {
+          const produkLama = await prisma.produk.findUnique({ where: { id }, select: { hargaAsalRmb: true } });
+          if (!produkLama) {
+            return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
+          }
+          hargaAsalRmbEfektif = Number(produkLama.hargaAsalRmb);
+        }
+        hargaJualIdrFinal = tentukanHargaJualIdr(hargaAsalRmbEfektif, kursFinal, undefined);
+      }
+    }
+
     const produk = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const diupdate = await tx.produk.update({
         where: { id },
@@ -51,8 +80,8 @@ export async function PATCH(req: NextRequest, { params }: Konteks) {
           ...(data.namaProduk !== undefined && { namaProduk: data.namaProduk }),
           ...(data.deskripsi !== undefined && { deskripsi: data.deskripsi }),
           ...(data.hargaAsalRmb !== undefined && { hargaAsalRmb: data.hargaAsalRmb }),
-          ...(data.kurs !== undefined && { kurs: data.kurs }),
-          ...(data.hargaJualIdr !== undefined && { hargaJualIdr: data.hargaJualIdr }),
+          ...(kursFinal !== undefined && { kurs: kursFinal }),
+          ...(hargaJualIdrFinal !== undefined && { hargaJualIdr: hargaJualIdrFinal }),
           ...(data.beratGram !== undefined && { beratGram: data.beratGram }),
           ...(data.linkSumber !== undefined && { linkSumber: data.linkSumber }),
           ...(data.stok !== undefined && { stok: data.stok }),
@@ -99,6 +128,8 @@ export async function PATCH(req: NextRequest, { params }: Konteks) {
   } catch (err) {
     const res = tanganiErrorAuth(err);
     if (res) return res;
+    const resApp = tanganiAppError(err);
+    if (resApp) return resApp;
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
       return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
     }

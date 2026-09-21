@@ -82,10 +82,13 @@ const TARIF_ONGKIR_DOMESTIK: Record<Zona, Record<KurirDomestik, { kgPertama: num
   },
 };
 
-/** Pola tarif ekspedisi asli: kg pertama + kg berikutnya, bukan flat linear. */
-export function hitungOngkirDomestik(provinsi: string, kurir: KurirDomestik, beratTotalKg: number): number {
+/** Pola tarif ekspedisi asli: kg pertama + kg berikutnya, bukan flat linear.
+ *  Terima GRAM (bukan kg) -- satu-satunya representasi berat yang beredar
+ *  di seluruh kode sekarang integer gram, tidak ada masalah presisi desimal. */
+export function hitungOngkirDomestik(provinsi: string, kurir: KurirDomestik, beratTotalGram: number): number {
   const zona = PROVINSI_KE_ZONA[provinsi] ?? ZONA_DEFAULT;
   const tarif = TARIF_ONGKIR_DOMESTIK[zona][kurir];
+  const beratTotalKg = beratTotalGram / 1000;
   const beratDibulatkan = Math.max(Math.ceil(beratTotalKg), 1);
   return tarif.kgPertama + tarif.kgBerikutnya * (beratDibulatkan - 1);
 }

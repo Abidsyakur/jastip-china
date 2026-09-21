@@ -36,11 +36,12 @@ export type UpdateStatusPesananInput = z.infer<typeof updateStatusPesananSchema>
 // sudah dihitung OTOMATIS saat checkout (lib/tarif.ts), field ini di sini jadi
 // override manual (kalau admin perlu koreksi kasus khusus). ongkirChinaGudang
 // TETAP cuma bisa diisi manual di sini -- belum ada kalkulatornya.
+// PATCH /api/admin/pesanan/[id]/biaya — biayaJasaTitip & ongkirDomestik sudah
+// FINAL & OTOMATIS sejak checkout (lib/tarif.ts), TIDAK BOLEH diubah lewat
+// endpoint ini sama sekali. Cuma ongkirChinaGudang yang masih manual admin
+// (belum ada kalkulatornya).
 export const updateBiayaSchema = z.object({
-  biayaJasaTitip: uangSchema,
   ongkirChinaGudang: uangSchema,
-  ongkirDomestik: uangSchema,
-  biayaAdminPayment: uangSchema.optional(),
 });
 export type UpdateBiayaInput = z.infer<typeof updateBiayaSchema>;
 

@@ -100,6 +100,141 @@ test("POST /api/admin/produk dengan data valid berhasil bikin produk + gambar + 
   assert.equal(json.produk.namaProduk, "Tas Import Premium");
 });
 
+test("POST /api/admin/produk TANPA hargaJualIdr: dihitung round(hargaAsalRmb x kurs) PERSIS, TANPA markup apapun (kasus bug yang dilaporkan)", async () => {
+  let dataDikirim: Record<string, unknown> | undefined;
+  fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
+    fn({
+      produk: {
+        create: async (args: { data: Record<string, unknown> }) => {
+          dataDikirim = args.data;
+          return { id: "produk_1", ...args.data, gambar: [], varian: [] };
+        },
+      },
+      logAktivitas: { create: async () => ({}) },
+    });
+
+  const body = {
+    kategoriId: "ckategoriid000000000001",
+    namaProduk: "Tas Import Premium",
+    hargaAsalRmb: 15,
+    kurs: 2300,
+    // hargaJualIdr SENGAJA tidak dikirim
+    beratGram: 500,
+    linkSumber: "https://taobao.com/item/123",
+    gambarUrls: ["https://cdn.example.com/a.jpg"],
+    varian: [],
+  };
+
+  const req = new NextRequest("http://localhost/api/admin/produk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", cookie: await cookieAdmin() },
+    body: JSON.stringify(body),
+  });
+  const res = await POST(req);
+
+  assert.equal(res.status, 201);
+  // PERSIS 34500 -- bukan 46580 (yang mengandung markup 35% tersembunyi)
+  assert.equal(dataDikirim?.hargaJualIdr, 34500);
+  assert.equal(dataDikirim?.kurs, 2300);
+});
+
+test("POST /api/admin/produk TANPA kurs: otomatis ambil dari KursMaster aktif (baris terbaru)", async () => {
+  let dataDikirim: Record<string, unknown> | undefined;
+  fakePrisma.kursMaster = {
+    findFirst: async () => ({ id: "kurs_1", kursRmbIdr: 2350, dibuatPada: new Date() }),
+  };
+  fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
+    fn({
+      produk: {
+        create: async (args: { data: Record<string, unknown> }) => {
+          dataDikirim = args.data;
+          return { id: "produk_1", ...args.data, gambar: [], varian: [] };
+        },
+      },
+      logAktivitas: { create: async () => ({}) },
+    });
+
+  const body = {
+    kategoriId: "ckategoriid000000000001",
+    namaProduk: "Tas Tanpa Kurs Eksplisit",
+    hargaAsalRmb: 10,
+    // kurs SENGAJA tidak dikirim
+    beratGram: 500,
+    linkSumber: "https://taobao.com/item/123",
+    gambarUrls: ["https://cdn.example.com/a.jpg"],
+    varian: [],
+  };
+
+  const req = new NextRequest("http://localhost/api/admin/produk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", cookie: await cookieAdmin() },
+    body: JSON.stringify(body),
+  });
+  const res = await POST(req);
+
+  assert.equal(res.status, 201);
+  assert.equal(dataDikirim?.kurs, 2350); // dari KursMaster
+  assert.equal(dataDikirim?.hargaJualIdr, 23500); // 10 x 2350
+});
+
+test("POST /api/admin/produk TANPA kurs DAN KursMaster belum pernah diisi -> 400, bukan crash", async () => {
+  fakePrisma.kursMaster = { findFirst: async () => null };
+
+  const body = {
+    kategoriId: "ckategoriid000000000001",
+    namaProduk: "Tas Tanpa Kurs Master",
+    hargaAsalRmb: 10,
+    beratGram: 500,
+    linkSumber: "https://taobao.com/item/123",
+    gambarUrls: ["https://cdn.example.com/a.jpg"],
+    varian: [],
+  };
+
+  const req = new NextRequest("http://localhost/api/admin/produk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", cookie: await cookieAdmin() },
+    body: JSON.stringify(body),
+  });
+  const res = await POST(req);
+  assert.equal(res.status, 400);
+});
+
+test("POST /api/admin/produk DENGAN hargaJualIdr eksplisit: dipakai apa adanya, TIDAK dihitung ulang", async () => {
+  let dataDikirim: Record<string, unknown> | undefined;
+  fakePrisma.$transaction = async (fn: (tx: unknown) => unknown) =>
+    fn({
+      produk: {
+        create: async (args: { data: Record<string, unknown> }) => {
+          dataDikirim = args.data;
+          return { id: "produk_1", ...args.data, gambar: [], varian: [] };
+        },
+      },
+      logAktivitas: { create: async () => ({}) },
+    });
+
+  const body = {
+    kategoriId: "ckategoriid000000000001",
+    namaProduk: "Tas Harga Manual",
+    hargaAsalRmb: 15,
+    kurs: 2300,
+    hargaJualIdr: 99000, // eksplisit, jauh beda dari 15x2300=34500
+    beratGram: 500,
+    linkSumber: "https://taobao.com/item/123",
+    gambarUrls: ["https://cdn.example.com/a.jpg"],
+    varian: [],
+  };
+
+  const req = new NextRequest("http://localhost/api/admin/produk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", cookie: await cookieAdmin() },
+    body: JSON.stringify(body),
+  });
+  const res = await POST(req);
+
+  assert.equal(res.status, 201);
+  assert.equal(dataDikirim?.hargaJualIdr, 99000); // apa adanya, bukan 34500
+});
+
 test("POST /api/admin/produk dengan body tidak valid (nama kosong) ditolak 400, tidak sampai panggil DB", async () => {
   let dbDipanggil = false;
   fakePrisma.$transaction = async () => {

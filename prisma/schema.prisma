@@ -46,6 +46,7 @@ model Admin {
   pembayaranDiverifikasi Pembayaran[]
   logAktivitas           LogAktivitas[]
   komplainLog            KomplainLog[]
+  kursDiinput            KursMaster[]
   sesiLogin              SesiLogin[]
   resetTokens            ResetPasswordToken[]
 
@@ -146,6 +147,19 @@ model Produk {
   pesananItem    PesananItem[]
 
   @@map("produk")
+}
+
+// Append-only (riwayat), bukan satu baris di-update terus -- konsisten
+// dengan pola audit trail lain di project ini (LogAktivitas, PesananStatusLog,
+// KomplainLog). "Kurs aktif" = baris dengan dibuatPada paling baru.
+model KursMaster {
+  id         String   @id @default(cuid())
+  kursRmbIdr Decimal  @map("kurs_rmb_idr") @db.Decimal(10, 2)
+  dibuatPada DateTime @default(now()) @map("dibuat_pada")
+  adminId    String   @map("admin_id")
+  admin      Admin    @relation(fields: [adminId], references: [id])
+
+  @@map("kurs_master")
 }
 
 enum ProdukStatus {
@@ -255,6 +269,9 @@ model Pesanan {
   biayaJasaTitip     Decimal       @map("biaya_jasa_titip") @db.Decimal(12, 2)
   ongkirChinaGudang  Decimal       @map("ongkir_china_ke_gudang") @db.Decimal(12, 2)
   ongkirDomestik     Decimal       @map("ongkir_domestik") @db.Decimal(12, 2)
+  // Snapshot permanen jumlah beratGram x jumlah semua PesananItem saat checkout,
+  // dalam GRAM -- supaya admin bisa audit ongkirDomestik tanpa hitung ulang manual.
+  beratTotalGram     Int           @map("berat_total_gram")
   biayaAdminPayment  Decimal       @default(0) @map("biaya_admin_payment") @db.Decimal(12, 2)
   totalAkhir         Decimal       @map("total_akhir") @db.Decimal(12, 2)
   tglPesan           DateTime      @default(now()) @map("tgl_pesan")

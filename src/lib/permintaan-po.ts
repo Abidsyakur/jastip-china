@@ -159,6 +159,7 @@ export async function responPenawaran(customerId: string, poId: string, input: R
         biayaJasaTitip: 0,
         ongkirChinaGudang,
         ongkirDomestik: 0, // sama seperti checkout katalog, diisi manual admin belakangan
+        beratTotalGram: 0, // Custom PO tidak punya beratGram produk, admin isi manual nanti
         totalAkhir,
         item: {
           create: {

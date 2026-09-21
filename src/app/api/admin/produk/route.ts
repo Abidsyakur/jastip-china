@@ -4,8 +4,9 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { parseBody, parseQuery, produkCreateSchema, produkAdminQuerySchema } from "@/lib/validasi";
 import { wajibAdmin } from "@/lib/auth";
-import { tanganiErrorAuth } from "@/lib/http-error";
+import { tanganiErrorAuth, tanganiAppError } from "@/lib/http-error";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
+import { tentukanKurs, tentukanHargaJualIdr } from "@/lib/produk";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
     const parsed = await parseBody(req, produkCreateSchema);
     if ("error" in parsed) return parsed.error;
     const data = parsed.data;
+
+    const kurs = await tentukanKurs(data.kurs);
+    const hargaJualIdr = tentukanHargaJualIdr(data.hargaAsalRmb, kurs, data.hargaJualIdr);
 
     // Create produk + gambar + varian dalam satu transaksi, sekalian catat
     // LogAktivitas — semua atomik, tidak ada yang lolos tanpa jejak.
@@ -25,8 +29,8 @@ export async function POST(req: NextRequest) {
           namaProduk: data.namaProduk,
           deskripsi: data.deskripsi,
           hargaAsalRmb: data.hargaAsalRmb,
-          kurs: data.kurs,
-          hargaJualIdr: data.hargaJualIdr,
+          kurs,
+          hargaJualIdr,
           beratGram: data.beratGram,
           linkSumber: data.linkSumber,
           stok: data.stok,
@@ -56,6 +60,8 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const res = tanganiErrorAuth(err);
     if (res) return res;
+    const resApp = tanganiAppError(err);
+    if (resApp) return resApp;
     throw err;
   }
 }

@@ -68,14 +68,13 @@ src/
 
 ## Status pengerjaan
 
-✅ Selesai (semua modul inti sesuai urutan prioritas di spesifikasi § 5): skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori, keranjang, alamat, pesanan + pembayaran manual lengkap (checkout, upload bukti, retry, verifikasi admin, cron kedaluwarsa), pipeline status pesanan + biaya + pengiriman (admin), custom PO (ajukan → review admin → konversi otomatis jadi Pesanan), upload file (presigned URL R2), notifikasi (list + tandai dibaca), komplain (ajukan customer + tindak lanjut admin), **statistik dashboard admin**.
+✅ Selesai (semua modul inti sesuai urutan prioritas di spesifikasi § 5): skema database, auth (customer + admin, RBAC OWNER/STAFF), rate limiting login, katalog produk + kategori + **kurs terpusat (`KursMaster`)**, keranjang, alamat, pesanan + pembayaran manual lengkap (checkout dengan tarif otomatis, upload bukti, retry, verifikasi admin, cron kedaluwarsa), pipeline status pesanan + biaya + pengiriman (admin), custom PO (ajukan → review admin → konversi otomatis jadi Pesanan), upload file (presigned URL R2), notifikasi (list + tandai dibaca), komplain (ajukan customer + tindak lanjut admin), statistik dashboard admin.
 
 ⏳ Belum dikerjakan (sesuai catatan asli di spesifikasi, tidak menghalangi jalan):
 - Testing otomatis untuk lingkungan dengan Postgres/Redis asli (yang ada sekarang: unit + integration test dengan mock, tanpa DB asli — lihat catatan testing di tiap bagian modul)
 - CI/CD
 - Page-view tracking untuk statistik "viewer"
-- Optimisasi kurs terpusat (masih per-produk)
-- Kalkulator tarif ongkir China→gudang otomatis (saat ini masih diisi manual admin lewat `PATCH /api/admin/pesanan/[id]/biaya`; `biayaJasaTitip` & `ongkirDomestik` **sudah otomatis** sejak update `lib/tarif.ts`)
+- Kalkulator tarif ongkir China→gudang otomatis (saat ini masih diisi manual admin lewat `PATCH /api/admin/pesanan/[id]/biaya`; `biayaJasaTitip` & `ongkirDomestik` sudah otomatis sejak `lib/tarif.ts`, kurs sekarang terpusat lewat `KursMaster`)
 
 ⏳ Belum dikerjakan (tidak menghalangi jalan, bisa menyusul):
 - Validasi terstruktur pakai Zod (saat ini validasi manual per endpoint)
@@ -303,6 +302,28 @@ Dua fungsi murni (tidak ada panggilan jaringan sama sekali), dipanggil langsung 
 **Testing**: 10 test baru (115 total, final).
 
 > **Fix pasca-rilis**: ditemukan sambil menyiapkan pengujian end-to-end — tidak ada satu pun kode yang benar-benar mengisi tabel `Notifikasi` (modul notifikasi cuma bisa baca, tidak ada yang menulis). Ditambahkan `lib/notifikasi.ts` § `buatNotifikasi()` (in-app, ditulis DI DALAM transaksi) dipanggil di 4 titik pemicu: verifikasi/tolak pembayaran, review PO, ubah status pesanan, tindak lanjut komplain — masing-masing juga langsung kirim WA (`kirimNotifikasiWa`, DI LUAR transaksi, sesuai prinsip #1).
+
+## Modul: Kurs Terpusat & Perbaikan Biaya Pesanan (ditemukan dari pengujian manual)
+
+**`KursMaster`** (`lib/kurs-master.ts`) — tabel baru, **append-only** (pola sama seperti `LogAktivitas`/`PesananStatusLog`): "kurs aktif" = baris dengan `dibuatPada` paling baru, bukan satu baris yang di-update terus.
+
+| Endpoint | Catatan |
+|---|---|
+| `GET /api/admin/kurs-master` | Riwayat semua kurs, terbaru dulu |
+| `GET /api/admin/kurs-master/aktif` | Cuma kurs yang berlaku sekarang |
+| `POST /api/admin/kurs-master` | Selalu bikin baris BARU, tidak pernah edit baris lama |
+
+**`POST`/`PATCH /api/admin/produk`** — `kurs` dan `hargaJualIdr` sekarang **opsional** (`lib/produk.ts`):
+- `kurs` tidak dikirim → ambil dari `KursMaster` aktif (400 kalau belum pernah diisi sama sekali).
+- `hargaJualIdr` tidak dikirim → dihitung `round(hargaAsalRmb × kurs)`, **murni, tanpa markup apapun** — `hitungBiayaJasaTitip()` TIDAK dipanggil di sini, cuma boleh di `prosesCheckout`.
+- `hargaJualIdr` dikirim eksplisit → dipakai apa adanya, mengabaikan hasil hitung otomatis.
+- **PATCH tanpa `hargaJualIdr` tapi kirim `hargaAsalRmb`/`kurs` baru → dihitung ULANG dari nilai baru, override manual sebelumnya TIDAK dipertahankan.** Ini sengaja (tidak ada tracking "manual override"), bukan bug — PATCH yang sama sekali tidak menyentuh field harga tidak memicu apa pun.
+
+**`Pesanan.beratTotalGram`** (kolom baru, required) — snapshot permanen jumlah `beratGram × jumlah` semua item saat checkout, dalam GRAM. `hitungOngkirDomestik` (`lib/tarif.ts`) sekarang terima gram langsung (bukan kg) — satu-satunya representasi berat yang beredar di kode ini integer gram, tidak ada isu presisi desimal.
+
+**`PATCH /api/admin/pesanan/[id]/biaya`** — diperbaiki: sebelumnya endpoint ini bisa ikut menimpa `biayaJasaTitip`/`ongkirDomestik` walau cuma diminta ubah `ongkirChinaGudang`. Sekarang **cuma terima `{ ongkirChinaGudang }`** — dua field lain (yang sudah final & otomatis sejak checkout) selalu diambil dari nilai **tersimpan**, tidak pernah dihitung ulang atau diterima dari body.
+
+**Testing**: unit test murni untuk `hitungOngkirDomestik` (satuan gram), test eksplisit "field liar di body diabaikan total" untuk endpoint biaya, dan test kasus bug asli (`hargaAsalRmb: 15, kurs: 2300` → `hargaJualIdr` PERSIS `34500`, bukan `46580`).
 
 ## Prinsip penting yang diikuti di seluruh kode
 

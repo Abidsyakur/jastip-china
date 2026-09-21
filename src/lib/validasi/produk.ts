@@ -33,8 +33,11 @@ export const produkCreateSchema = z.object({
   namaProduk: z.string().trim().min(3, "Nama produk minimal 3 karakter").max(200),
   deskripsi: z.string().trim().max(5000).optional(),
   hargaAsalRmb: uangPositifSchema,
-  kurs: uangPositifSchema,
-  hargaJualIdr: uangPositifSchema,
+  // Opsional sekarang: kalau tidak dikirim, ambil dari KursMaster aktif
+  // (lib/produk.ts § tentukanKurs). hargaJualIdr juga opsional: kalau tidak
+  // dikirim, dihitung otomatis round(hargaAsalRmb x kurs) TANPA markup apapun.
+  kurs: uangPositifSchema.optional(),
+  hargaJualIdr: uangPositifSchema.optional(),
   beratGram: z.coerce.number().int().positive("Berat harus lebih dari 0 gram"),
   linkSumber: z.string().trim().url("Link sumber harus berupa URL valid"),
   stok: z.coerce.number().int().nonnegative().default(0),
