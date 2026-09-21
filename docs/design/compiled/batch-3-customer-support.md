@@ -1,6 +1,6 @@
 ﻿# BATCH 3: CUSTOMER SUPPORT
 
-Gabungan 8 file customer support screens untuk pen.dev
+Gabungan 11 file customer support + static screens untuk pen.dev
 
 ---
 
@@ -2527,4 +2527,834 @@ Coba kata kunci lain, atau chat admin via WA.
 ### No Completed Orders (Komplain disabled)
 ```
 Komplain cuma bisa buat pesanan yang udah selesai.
+```
+
+
+
+========================================
+# FILE: 18-tentang-kami.md
+========================================
+
+# Screen 18: Tentang Kami
+
+## Tujuan
+Halaman statis brand: siapa Jastip China, bukti sederhana (statistik), kenapa pilih kami, kontak. Bukan landing marketing agresif, tidak ada hard-sell CTA.
+
+---
+
+## Layout Wireframe (Desktop)
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ [Jastip China]   Beranda  Katalog  Cara Order  [â™¡] [ðŸ›’] [ðŸ‘¤] â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                â”‚
+â”‚  Tentang Kami                                                 â”‚
+â”‚  é²œè´§ç›´è¾¾                                                      â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Jastip China bantu kamu beli barang langsung dari      â”‚ â”‚
+â”‚  â”‚  China tanpa ribet. Pilih dari katalog ready stock,     â”‚ â”‚
+â”‚  â”‚  atau ajukan Custom PO kalau barangnya nggak ada        â”‚ â”‚
+â”‚  â”‚  di katalog. Kami urus pembelian, konsolidasi,          â”‚ â”‚
+â”‚  â”‚  sampai pengiriman ke rumahmu.                          â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚
+â”‚  â”‚   1.200+     â”‚  â”‚     850+     â”‚  â”‚     4.9      â”‚        â”‚
+â”‚  â”‚   Pesanan    â”‚  â”‚   Customer   â”‚  â”‚   Rating     â”‚        â”‚
+â”‚  â”‚   terkirim   â”‚  â”‚    aktif     â”‚  â”‚   kepuasan   â”‚        â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”‚
+â”‚                                                                â”‚
+â”‚  â”€â”€â”€ cloud pattern border (5% opacity) â”€â”€â”€                   â”‚
+â”‚                                                                â”‚
+â”‚  Kenapa Jastip China                                         â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Harga transparan                                        â”‚ â”‚
+â”‚  â”‚  Harga produk + jasa titip + ongkir dirinci jelas       â”‚ â”‚
+â”‚  â”‚  sebelum kamu bayar. Nggak ada biaya siluman.           â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Update status otomatis                                  â”‚ â”‚
+â”‚  â”‚  Tiap tahap pesanan (verifikasi, proses, kirim)         â”‚ â”‚
+â”‚  â”‚  muncul di halaman lacak + notifikasi.                  â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Custom PO                                               â”‚ â”‚
+â”‚  â”‚  Barang nggak ada di katalog? Kirim link produk China,  â”‚ â”‚
+â”‚  â”‚  tim kami kasih estimasi harga 1-2 hari kerja.          â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Jalur komplain jelas                                   â”‚ â”‚
+â”‚  â”‚  Barang rusak atau nggak sesuai? Ajukan komplain        â”‚ â”‚
+â”‚  â”‚  langsung dari detail pesanan.                          â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Hubungi kami                                            â”‚ â”‚
+â”‚  â”‚  WhatsApp: 0812-0000-0000        [Chat WhatsApp]        â”‚ â”‚
+â”‚  â”‚  Email: hello@jastipchina.id                            â”‚ â”‚
+â”‚  â”‚  Jam: Senin-Sabtu, 09:00-18:00 WIB                      â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Footer                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+## Layout Wireframe (Mobile)
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ [â†]  Tentang Kami        â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                            â”‚
+â”‚ Tentang Kami               â”‚
+â”‚ é²œè´§ç›´è¾¾                    â”‚
+â”‚                            â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚ Jastip China bantu     â”‚ â”‚
+â”‚ â”‚ kamu beli barang       â”‚ â”‚
+â”‚ â”‚ langsung dari China... â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚1.200+â”‚ â”‚ 850+ â”‚ â”‚ 4.9  â”‚ â”‚
+â”‚ â”‚Kirim â”‚ â”‚Cust. â”‚ â”‚Ratingâ”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚
+â”‚ Kenapa Jastip China        â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚ Harga transparan       â”‚ â”‚
+â”‚ â”‚ Harga + jasa + ongkir  â”‚ â”‚
+â”‚ â”‚ dirinci jelas...       â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚ Update status otomatis â”‚ â”‚
+â”‚ â”‚ ...                    â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚ Custom PO              â”‚ â”‚
+â”‚ â”‚ ...                    â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚ Jalur komplain jelas   â”‚ â”‚
+â”‚ â”‚ ...                    â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚ Hubungi kami           â”‚ â”‚
+â”‚ â”‚ WA: 0812-0000-0000     â”‚ â”‚
+â”‚ â”‚ [Chat WhatsApp]        â”‚ â”‚
+â”‚ â”‚ hello@jastipchina.id   â”‚ â”‚
+â”‚ â”‚ Senin-Sabtu 09-18 WIB  â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚[Home][Katalog][+][Cart][Me]â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+---
+
+## Sections
+
+### Section 1: Header
+- Standard nav, no active menu (or "Tentang Kami" if in footer link context)
+- Mobile: back button, title "Tentang Kami"
+
+### Section 2: Title + Tagline
+- **Title:** "Tentang Kami" (H1, Noto Serif SC 700, 32px desktop / 24px mobile)
+- **Tagline:** "é²œè´§ç›´è¾¾" (Ma Shan Zheng, 24px, Chinese Red)
+- No CTA button, no hero image, no gradient
+
+### Section 3: Deskripsi
+- **Layout:** Card or plain block, max-width 720px
+- **Content:** 1 short paragraph (3-5 sentences), Inter 400, 16px
+- Plain text, no drop cap, no pull quote styling
+
+### Section 4: Statistik
+- **Layout:** 3 stat boxes, horizontal (desktop) / 3-col compact (mobile)
+- **Content:**
+  - Pesanan terkirim (count, e.g., "1.200+")
+  - Customer aktif (count, e.g., "850+")
+  - Rating kepuasan (e.g., "4.9")
+- **Style:** Number (Noto Serif SC 700, 32px desktop / 20px mobile, Chinese Red), label (Inter 400, 12px, #6B5D52)
+- **ANTI-PATTERN:** NO count-up animation (static display)
+
+### Section 5: Keunggulan
+- **Layout:** Vertical list in card container, dividers between items
+- **Content (4 items):**
+  1. Harga transparan
+  2. Update status otomatis
+  3. Custom PO
+  4. Jalur komplain jelas
+- **Each item:** Title (Inter 600, 15px) + 1-2 sentence desc (Inter 400, 14px, #6B5D52)
+- **Style:** Plain list, NO icon cards, NO colored tiles, NO shadow boxes per item
+
+### Section 6: Kontak
+- **Layout:** Card container
+- **Content:** WhatsApp + "Chat WhatsApp" button (ghost, WhatsApp green border), email, jam operasional
+- **Behavior:** Chat button â†’ `window.open(wa.me/...)`
+
+---
+
+## States
+
+### Loading
+- Static page, no skeleton needed (content bundled, renders instantly)
+
+### Error
+- N/A (no API dependency; stats are static text updated manually)
+
+---
+
+## Interactions
+
+### Chat WhatsApp
+- Click â†’ open wa.me link in new tab with pre-filled message
+
+### Email
+- Click â†’ `mailto:` link
+
+### Nav Links
+- Standard header/footer navigation
+
+---
+
+## Edge Cases
+
+### Stats Outdated
+- Stats are manual text; admin updates when needed
+- No auto-fetch, no fake live counter
+
+### Long Description
+- Max 1 paragraph + optional 2nd short paragraph
+- No "read more" expander (keep page short)
+
+---
+
+## WHAT NOT TO DO
+
+1. âŒ NO hero banner with CTA button
+2. âŒ NO "ABOUT US" / "TENTANG KAMI" ALL-CAPS eyebrow label
+3. âŒ NO count-up animation on stats
+4. âŒ NO team member photos (fake team = trust killer)
+5. âŒ NO testimonial carousel (no verified review system yet)
+6. âŒ NO "Our Mission / Our Vision" corporate blocks
+7. âŒ NO timeline "Founded 2020 â†’ 2021 â†’ ..." decoration
+8. âŒ NO gradient background
+9. âŒ NO "â†’" in buttons
+
+---
+
+## Copy
+
+### Page Title (H1)
+```
+Tentang Kami
+é²œè´§ç›´è¾¾
+```
+
+### Deskripsi
+```
+Jastip China bantu kamu beli barang langsung dari China tanpa ribet. Pilih dari katalog ready stock, atau ajukan Custom PO kalau barangnya nggak ada di katalog. Kami urus pembelian, konsolidasi, sampai pengiriman ke rumahmu.
+```
+
+### Statistik
+```
+1.200+
+Pesanan terkirim
+
+850+
+Customer aktif
+
+4.9
+Rating kepuasan
+```
+
+### Keunggulan
+```
+Kenapa Jastip China
+
+Harga transparan
+Harga produk + jasa titip + ongkir dirinci jelas sebelum kamu bayar. Nggak ada biaya siluman.
+
+Update status otomatis
+Tiap tahap pesanan (verifikasi, proses, kirim) muncul di halaman lacak + notifikasi.
+
+Custom PO
+Barang nggak ada di katalog? Kirim link produk China, tim kami kasih estimasi harga 1-2 hari kerja.
+
+Jalur komplain jelas
+Barang rusak atau nggak sesuai? Ajukan komplain langsung dari detail pesanan.
+```
+
+### Kontak
+```
+Hubungi kami
+
+WhatsApp: 0812-0000-0000
+[Chat WhatsApp]
+
+Email: hello@jastipchina.id
+Jam: Senin-Sabtu, 09:00-18:00 WIB
+```
+
+
+
+========================================
+# FILE: 19-cara-order.md
+========================================
+
+# Screen 19: Cara Order
+
+## Tujuan
+Panduan 6 langkah order untuk customer baru. Edukasi alur transaksi end-to-end agar customer paham sebelum belanja. Ini satu-satunya halaman yang boleh pakai angka berurutan sebagai konten fungsional (bukan dekorasi).
+
+---
+
+## Layout Wireframe (Desktop)
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ [Jastip China]   Beranda  Katalog  Cara Order  [â™¡] [ðŸ›’] [ðŸ‘¤] â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                â”‚
+â”‚  Cara Order                                                   â”‚
+â”‚  Belanja barang China dalam 6 langkah gampang               â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚
+â”‚  â”‚      1       â”‚  â”‚      2       â”‚  â”‚      3       â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚              â”‚        â”‚
+â”‚  â”‚ Pilih produk â”‚  â”‚   Checkout   â”‚  â”‚   Transfer   â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚              â”‚        â”‚
+â”‚  â”‚ Cari di      â”‚  â”‚ Tentuin      â”‚  â”‚ Transfer ke  â”‚        â”‚
+â”‚  â”‚ katalog atau â”‚  â”‚ alamat +     â”‚  â”‚ rekening     â”‚        â”‚
+â”‚  â”‚ ajukan PO... â”‚  â”‚ kurir...     â”‚  â”‚ kami...      â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚              â”‚        â”‚
+â”‚  â”‚ [Lihat       â”‚  â”‚ [Ke          â”‚  â”‚              â”‚        â”‚
+â”‚  â”‚  Katalog]    â”‚  â”‚  Keranjang]  â”‚  â”‚              â”‚        â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚
+â”‚  â”‚      4       â”‚  â”‚      5       â”‚  â”‚      6       â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚              â”‚        â”‚
+â”‚  â”‚ Upload bukti â”‚  â”‚  Kami belikanâ”‚  â”‚   Sampai di  â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚    rumahmu   â”‚        â”‚
+â”‚  â”‚ Upload bukti â”‚  â”‚ Tim kami     â”‚  â”‚ Kurir antar  â”‚        â”‚
+â”‚  â”‚ transfer,    â”‚  â”‚ belikan +    â”‚  â”‚ ke alamatmu. â”‚        â”‚
+â”‚  â”‚ admin verif..â”‚  â”‚ kirim...     â”‚  â”‚ Lacak di...  â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚              â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚ [Lacak       â”‚        â”‚
+â”‚  â”‚              â”‚  â”‚              â”‚  â”‚  Pesanan]    â”‚        â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Masih bingung? Chat admin via WhatsApp                  â”‚ â”‚
+â”‚  â”‚  [Chat WhatsApp]                                          â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Footer                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+## Layout Wireframe (Mobile)
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ [â†]  Cara Order         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                            â”‚
+â”‚ Cara Order                 â”‚
+â”‚ Belanja barang China       â”‚
+â”‚ dalam 6 langkah gampang    â”‚
+â”‚                            â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚  1  Pilih produk       â”‚ â”‚
+â”‚ â”‚     Cari di katalog    â”‚ â”‚
+â”‚ â”‚     atau ajukan PO.    â”‚ â”‚
+â”‚ â”‚     [Lihat Katalog]    â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚  2  Checkout           â”‚ â”‚
+â”‚ â”‚     Tentuin alamat +   â”‚ â”‚
+â”‚ â”‚     kurir.             â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚  3  Transfer           â”‚ â”‚
+â”‚ â”‚     Transfer ke        â”‚ â”‚
+â”‚ â”‚     rekening kami.     â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚  4  Upload bukti       â”‚ â”‚
+â”‚ â”‚     Upload bukti,      â”‚ â”‚
+â”‚ â”‚     admin verifikasi.  â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚  5  Kami belikan       â”‚ â”‚
+â”‚ â”‚     Tim belikan +      â”‚ â”‚
+â”‚ â”‚     kirim.             â”‚ â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚ â”‚  6  Sampai di rumahmu  â”‚ â”‚
+â”‚ â”‚     Lacak di halaman   â”‚ â”‚
+â”‚ â”‚     lacak.             â”‚ â”‚
+â”‚ â”‚     [Lacak Pesanan]    â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚ Masih bingung?         â”‚ â”‚
+â”‚ â”‚ [Chat WhatsApp]        â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚[Home][Katalog][+][Cart][Me]â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+---
+
+## Sections
+
+### Section 1: Header
+- Standard nav, "Cara Order" active
+- Mobile: back button, title "Cara Order"
+
+### Section 2: Title + Subtitle
+- **Title:** "Cara Order" (H1, Noto Serif SC 700, 32px desktop / 24px mobile)
+- **Subtitle:** "Belanja barang China dalam 6 langkah gampang" (Inter 400, 16px, #6B5D52)
+
+### Section 3: Steps Grid
+- **Layout (Desktop):** 3-col grid, 2 rows (steps 1-3 top, 4-6 bottom), gap 24px
+- **Layout (Tablet):** 2-col grid, 3 rows
+- **Layout (Mobile):** Vertical list, 1 col, dividers between steps
+- **Each step card:**
+  ```
+  Background: #FFFFFF
+  Border: 1px solid #E8DCC8
+  Radius: 12px
+  Padding: 24px desktop / 16px mobile
+  Content:
+    - Step number (circle, 40x40px, background Chinese Red, white text, Noto Serif SC 700, 20px)
+    - Title (Noto Serif SC 600, 18px)
+    - Description (Inter 400, 14px, #6B5D52, 2-3 sentences)
+    - Link (optional, steps 1, 2, 6 only): ghost link, Chinese Red
+  ```
+
+### Section 4: Help Box
+- **Layout:** Card, full width, margin 48px top
+- **Background:** #F7F3EC
+- **Border-left:** 4px solid #7C9885 (jade, friendly tone)
+- **Content:** "Masih bingung? Chat admin via WhatsApp" + "Chat WhatsApp" button
+
+---
+
+## States
+
+### Loading
+- Static page, renders instantly, no skeleton
+
+### Error
+- N/A (no API dependency)
+
+---
+
+## Interactions
+
+### Step Links
+- Step 1 "Lihat Katalog" â†’ `/katalog`
+- Step 2 "Ke Keranjang" â†’ `/keranjang`
+- Step 6 "Lacak Pesanan" â†’ `/lacak`
+- Other steps: no link (info only)
+
+### Chat WhatsApp
+- Click â†’ wa.me link, new tab
+
+---
+
+## Edge Cases
+
+### User Already Knows Flow
+- Page is reference, not forced wizard
+- No "Next/Prev" navigation, all steps visible at once
+
+---
+
+## WHAT NOT TO DO
+
+1. âŒ NO "â†’" in buttons
+2. âŒ NO "HOW TO ORDER" / "STEP BY STEP" ALL-CAPS eyebrow
+3. âŒ NO animated step connector line with moving dot
+4. âŒ NO auto-play video tutorial
+5. âŒ NO "Start Shopping Now!" aggressive CTA at bottom
+6. âŒ NO decorative 01/02/03 large background numbers (the small numbered circles ARE the content, keep them 40px, functional, not decorative wallpaper)
+7. âŒ NO gradient background
+
+---
+
+## Copy
+
+### Page Title (H1)
+```
+Cara Order
+Belanja barang China dalam 6 langkah gampang
+```
+
+### Steps
+
+```
+1. Pilih produk
+Cari di katalog ready stock, atau ajukan Custom PO kalau barangnya nggak ada di katalog. Tentuin varian + jumlah.
+[Lihat Katalog]
+
+2. Checkout
+Masukin keranjang, terus checkout. Pilih alamat pengiriman + kurir domestik. Cek rincian biaya sebelum lanjut bayar.
+[Ke Keranjang]
+
+3. Transfer
+Transfer total bayar ke rekening bank kami (BCA / Mandiri). Nominal harus pas sesuai invoice.
+
+4. Upload bukti
+Upload foto bukti transfer di halaman pembayaran. Admin verifikasi maksimal 1x24 jam. Tunggu notifikasi.
+
+5. Kami belikan
+Setelah pembayaran terverifikasi, tim kami belikan barang dari China, konsolidasi, terus kirim ke Indonesia.
+
+6. Sampai di rumahmu
+Kurir domestik antar ke alamatmu. Lacak status kapan aja pakai nomor invoice.
+[Lacak Pesanan]
+```
+
+### Help Box
+```
+Masih bingung? Chat admin via WhatsApp
+[Chat WhatsApp]
+```
+
+
+
+========================================
+# FILE: 20-ajukan-komplain.md
+========================================
+
+# Screen 20: Ajukan Komplain
+
+## Tujuan
+Customer ajukan komplain untuk pesanan SELESAI. Form dedicated: pilih item (jika multi-item), alasan, deskripsi, foto wajib. SLA jelas.
+
+---
+
+## Layout Wireframe (Desktop)
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ [Jastip China]   Beranda  Katalog  Cara Order  [â™¡] [ðŸ›’] [ðŸ‘¤] â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Home / Riwayat / INV-... / Komplain  (breadcrumb)           â”‚
+â”‚                                                                â”‚
+â”‚  Ajukan Komplain                                              â”‚
+â”‚  Pesanan INV-20240115-A1B2C3D4                                â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Info box                                                â”‚ â”‚
+â”‚  â”‚  Komplain cuma bisa buat pesanan yang udah selesai.     â”‚ â”‚
+â”‚  â”‚  Admin respon maksimal 2x24 jam hari kerja.              â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Item yang Dikomplain *                                  â”‚ â”‚
+â”‚  â”‚                                                          â”‚ â”‚
+â”‚  â”‚  (â—‹) Tas Backpack Premium (Hitam) â€” Rp 282.000 x1      â”‚ â”‚
+â”‚  â”‚  (â—‹) Kaos Oversized (Size L Hitam) â€” Rp 35.250 x2       â”‚ â”‚
+â”‚  â”‚  (â—‹) Semua item di pesanan ini                          â”‚ â”‚
+â”‚  â”‚                                                          â”‚ â”‚
+â”‚  â”‚  Alasan Komplain *                                       â”‚ â”‚
+â”‚  â”‚  (â—‹) Barang rusak                                        â”‚ â”‚
+â”‚  â”‚  (â—‹) Barang tidak sesuai deskripsi                       â”‚ â”‚
+â”‚  â”‚  (â—‹) Salah kirim (varian / jumlah)                       â”‚ â”‚
+â”‚  â”‚  (â—‹) Lainnya                                             â”‚ â”‚
+â”‚  â”‚                                                          â”‚ â”‚
+â”‚  â”‚  Deskripsi Masalah *                                     â”‚ â”‚
+â”‚  â”‚  [                                                      ] â”‚ â”‚
+â”‚  â”‚  [  Strap kanan tas putus pas barang sampai...        ] â”‚ â”‚
+â”‚  â”‚  [                                                      ] â”‚ â”‚
+â”‚  â”‚  Minimal 20 karakter                                     â”‚ â”‚
+â”‚  â”‚                                                          â”‚ â”‚
+â”‚  â”‚  Foto Bukti (wajib, min 1, max 5)                       â”‚ â”‚
+â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚ â”‚
+â”‚  â”‚  â”‚                                                    â”‚    â”‚ â”‚
+â”‚  â”‚  â”‚  [Drop foto di sini] atau [Pilih File]          â”‚    â”‚ â”‚
+â”‚  â”‚  â”‚  JPG/PNG, max 5MB per foto                       â”‚    â”‚ â”‚
+â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚ â”‚
+â”‚  â”‚  â”Œâ”€â”€â” â”Œâ”€â”€â”                                               â”‚ â”‚
+â”‚  â”‚  â”‚  â”‚ â”‚  â”‚  (preview uploaded)                           â”‚ â”‚
+â”‚  â”‚  â””â”€â”€â”˜ â””â”€â”€â”˜                                               â”‚ â”‚
+â”‚  â”‚                                                          â”‚ â”‚
+â”‚  â”‚  [Kirim Komplain]                                        â”‚ â”‚
+â”‚  â”‚                                                          â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Footer                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+## Layout Wireframe (Mobile)
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ [â†]  Ajukan Komplain    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                            â”‚
+â”‚ Ajukan Komplain            â”‚
+â”‚ INV-20240115-A1B2C3D4     â”‚
+â”‚                            â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚ Komplain cuma bisa     â”‚ â”‚
+â”‚ â”‚ buat pesanan selesai.  â”‚ â”‚
+â”‚ â”‚ Admin respon 2x24 jam. â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚
+â”‚ Item yang Dikomplain *     â”‚
+â”‚ (â—‹) Tas Backpack (Hitam)   â”‚
+â”‚ (â—‹) Kaos Oversized (L)     â”‚
+â”‚ (â—‹) Semua item             â”‚
+â”‚                            â”‚
+â”‚ Alasan Komplain *          â”‚
+â”‚ (â—‹) Barang rusak           â”‚
+â”‚ (â—‹) Tidak sesuai deskripsi â”‚
+â”‚ (â—‹) Salah kirim            â”‚
+â”‚ (â—‹) Lainnya                â”‚
+â”‚                            â”‚
+â”‚ Deskripsi Masalah *        â”‚
+â”‚ [                          ] â”‚
+â”‚ [  Strap kanan putus...   ] â”‚
+â”‚ [                          ] â”‚
+â”‚ Min 20 karakter            â”‚
+â”‚                            â”‚
+â”‚ Foto Bukti (wajib)         â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚ [Drop/Pilih File]      â”‚ â”‚
+â”‚ â”‚ JPG/PNG, 5MB max      â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚ â”Œâ”€â”€â” â”Œâ”€â”€â”                 â”‚
+â”‚ â”‚  â”‚ â”‚  â”‚                 â”‚
+â”‚ â””â”€â”€â”˜ â””â”€â”€â”˜                 â”‚
+â”‚                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ [Kirim Komplain]          â”‚ â† sticky CTA
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚[Home][Katalog][+][Cart][Me]â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+
+(Success state):
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                            â”‚
+â”‚        [icon: check]       â”‚
+â”‚                            â”‚
+â”‚   Komplain terkirim        â”‚
+â”‚   Admin respon maksimal    â”‚
+â”‚   2x24 jam hari kerja. Kamuâ”‚
+â”‚   bakal dikabarin via      â”‚
+â”‚   notifikasi.              â”‚
+â”‚                            â”‚
+â”‚   [Lihat Riwayat]         â”‚
+â”‚   [Kembali ke Beranda]    â”‚
+â”‚                            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+---
+
+## Sections
+
+### Section 1: Header
+- Breadcrumb (desktop): Home / Riwayat / [Invoice] / Komplain
+- Mobile: back button (â†’ `/pesanan/[id]`), title "Ajukan Komplain"
+
+### Section 2: Title + Invoice
+- "Ajukan Komplain" (H1)
+- "Pesanan INV-..." (Inter 500, 14px, #6B5D52, monospace for invoice)
+
+### Section 3: Info Box
+- **Background:** #F7F3EC
+- **Border-left:** 4px solid #C8102E
+- **Content:** "Komplain cuma bisa buat pesanan yang udah selesai. Admin respon maksimal 2x24 jam hari kerja."
+
+### Section 4: Form
+- **Fields:**
+  1. **Item yang Dikomplain** (required, radio)
+     - One radio per item in pesanan (nama + varian + harga + qty)
+     - Plus: "Semua item di pesanan ini"
+     - If pesanan has 1 item: auto-select it, hide radio group
+  2. **Alasan Komplain** (required, radio)
+     - Barang rusak
+     - Barang tidak sesuai deskripsi
+     - Salah kirim (varian / jumlah)
+     - Lainnya
+  3. **Deskripsi Masalah** (required, textarea)
+     - Min 20 chars, max 1000
+     - Placeholder with example
+     - Character count display
+  4. **Foto Bukti** (required, min 1, max 5)
+     - Same upload zone style as upload-bukti
+     - JPG/PNG, max 5MB each
+     - Preview thumbnails with remove button
+
+### Section 5: Submit
+- "Kirim Komplain" (Primary, full width)
+- Mobile: sticky bottom bar
+
+### Section 6: Success State
+- **Layout:** Centered, replaces form after submit
+- **Content:**
+  - Check icon (jade circle, 80x80px)
+  - "Komplain terkirim" (H1)
+  - "Admin respon maksimal 2x24 jam hari kerja. Kamu bakal dikabarin via notifikasi."
+  - "Lihat Riwayat" (primary) â†’ `/pesanan`
+  - "Kembali ke Beranda" (secondary) â†’ `/`
+
+---
+
+## States
+
+### Loading (Submit)
+- Button: spinner + "Mengirim..."
+- Disable form
+
+### Validation Error
+- Inline per-field errors
+- Foto: "Minimal 1 foto bukti wajib diupload"
+
+### Success
+- Replace form with success state (no redirect)
+- Customer notified (notifikasi created)
+
+### Already Complained (same pesanan)
+- If komplain exists for this pesanan: redirect to `/pesanan/[id]` with toast "Komplain udah diajukan buat pesanan ini."
+- Show link "Lihat Status Komplain"
+
+### Pesanan Not SELESAI
+- If status != SELESAI: redirect to `/pesanan/[id]` with toast "Komplain cuma bisa buat pesanan yang udah selesai."
+
+### Single Item Pesanan
+- Hide "Item yang Dikomplain" radio group
+- Auto-select the only item
+- Show: "Item: Tas Backpack Premium (Hitam)" as read-only text
+
+---
+
+## Interactions
+
+### Item Radio
+- Click â†’ select item (instant)
+
+### Alasan Radio
+- Click â†’ select (instant)
+- If "Lainnya": show extra text input "Jelaskan alasan" (optional)
+
+### Foto Upload
+- Drop or click â†’ validate (type, size, count) â†’ preview thumbnail
+- Remove: X on thumbnail â†’ remove from list
+- Min 1 required to submit
+
+### Submit
+- Validate all â†’ upload fotos to R2 â†’ POST /api/komplain â†’ success state
+- On fail: toast "Gagal kirim komplain. Coba lagi."
+
+---
+
+## Edge Cases
+
+### Many Items (10+)
+- Radio list scrollable (max-height 300px)
+- "Semua item" option at top for convenience
+
+### Very Long Description
+- Max 1000 chars, counter "500/1000"
+- Textarea auto-resize, max 10 lines
+
+### Foto Upload Fail
+- Toast: "Gagal upload foto. Coba lagi."
+- Remove failed file
+
+### Network Slow
+- Progress indicator on upload (spinner per thumbnail)
+- Don't timeout before 30s
+
+---
+
+## WHAT NOT TO DO
+
+1. âŒ NO "â†’" in buttons
+2. âŒ NO "SUBMIT COMPLAINT" (use "Kirim Komplain")
+3. âŒ NO optional foto (foto WAJIB for komplain, min 1)
+4. âŒ NO "Expected resolution" dropdown (customer describes, admin decides solution)
+5. âŒ NO refund amount input (admin decides after review)
+6. âŒ NO rating of admin response (backlog)
+7. âŒ NO anonymous komplain (must be logged in + own pesanan)
+
+---
+
+## Copy
+
+### Page Title (H1)
+```
+Ajukan Komplain
+Pesanan INV-20240115-A1B2C3D4
+```
+
+### Info Box
+```
+Komplain cuma bisa buat pesanan yang udah selesai.
+Admin respon maksimal 2x24 jam hari kerja.
+```
+
+### Form
+```
+Item yang Dikomplain *
+(â—‹) Tas Backpack Premium (Hitam) â€” Rp 282.000 x1
+(â—‹) Kaos Oversized (Size L Hitam) â€” Rp 35.250 x2
+(â—‹) Semua item di pesanan ini
+
+Alasan Komplain *
+(â—‹) Barang rusak
+(â—‹) Barang tidak sesuai deskripsi
+(â—‹) Salah kirim (varian / jumlah)
+(â—‹) Lainnya
+
+Deskripsi Masalah *
+[Strap kanan tas putus pas barang sampai...]
+Minimal 20 karakter
+
+Foto Bukti (wajib, min 1, max 5)
+[Drop foto di sini] atau [Pilih File]
+JPG/PNG, max 5MB per foto
+
+[Kirim Komplain]
+```
+
+### Single Item (read-only)
+```
+Item: Tas Backpack Premium (Hitam)
+```
+
+### Success
+```
+Komplain terkirim
+Admin respon maksimal 2x24 jam hari kerja.
+Kamu bakal dikabarin via notifikasi.
+
+[Lihat Riwayat]
+[Kembali ke Beranda]
+```
+
+### Validation Errors
+```
+Pilih item yang dikomplain dulu
+Pilih alasan komplain dulu
+Deskripsi minimal 20 karakter
+Minimal 1 foto bukti wajib diupload
+Maksimal 5 foto
+Cuma bisa upload JPG atau PNG
+Ukuran foto kebanyakan. Maksimal 5MB.
+```
+
+### Toasts
+```
+Komplain udah diajukan buat pesanan ini.
+Komplain cuma bisa buat pesanan yang udah selesai.
+Gagal kirim komplain. Coba lagi.
 ```
