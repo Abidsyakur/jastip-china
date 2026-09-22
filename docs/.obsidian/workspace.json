@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "00-index.md",
+                "file": "keputusan/keputusan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "00-index"
+              "title": "keputusan"
             }
           }
         ]
@@ -188,8 +188,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "2a0fb942cd73def0",
+  "active": "6c485d1d317d01c6",
   "lastOpenFiles": [
+    "00-index.md",
     "design/nihao.pen",
     "design/pen-dev-desktop.pdf",
     "design/export.pdf",

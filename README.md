@@ -300,6 +300,7 @@ Dua fungsi murni (tidak ada panggilan jaringan sama sekali), dipanggil langsung 
 | `PATCH /api/admin/pesanan/[id]/status` | Ubah status pipeline, guard: pesanan status TERMINAL (SELESAI/DIBATALKAN) tidak bisa diubah lagi, selalu nambah `PesananStatusLog` |
 | `PATCH /api/admin/pesanan/[id]/pengiriman` | Realisasi kurir/resi, `Pengiriman` lazy-create (pola sama seperti `Keranjang`) |
 | `GET /api/admin/dashboard/statistik` | Pesanan per status, yang perlu perhatian (pembayaran/PO/komplain), produk aktif, omzet |
+| `GET /api/admin/dashboard/omzet-harian` | Deret omzet + jumlah pesanan per hari (`?hari`, default 7 max 30, bucket WIB, hari kosong = 0) untuk chart dashboard — agregasi di JS, definisi omzet sama dengan statistik |
 | `GET /api/admin/dashboard/produk-terlaris` | Top produk (default 5, max 20) — agregat `PesananItem` per `produkId`, definisi "terjual" sama dengan omzet (bukan nunggu bayar/batal), item CUSTOM_PO tidak ikut |
 | `GET /api/admin/log-aktivitas` | List audit (sebelumnya cuma ditulis, tidak bisa dibaca) — pagination + filter `aksi` (contains) + `adminId`, terbaru dulu, include nama/email admin |
 
@@ -349,6 +350,8 @@ Endpoint untuk 6 kebutuhan halaman desain yang belum punya backend:
 - **Migrasi `sinkron-kurs-berat-rekening`**: sekalian menutup drift lama — `berat_total_gram` + tabel `kurs_master` (dari modul kurs) ternyata belum pernah masuk migration files SAMA SEKALI di local maupun prod (ketahuan karena `migrate dev` gagal dengan 13 baris existing). Backfill berat dari `SUM(berat_gram × jumlah)` item per pesanan, bukan default 0 buta.
 
 **Testing**: 27 test baru (155 total, final).
+
+> **Tambahan**: `GET /api/admin/dashboard/omzet-harian` (4 test baru, 159 total) — diminta untuk chart "Omzet per hari" di desain dashboard admin, yang tidak punya sumber data sebelumnya. Tidak menyentuh arsitektur yang ada: agregasi di JS (bukan raw SQL), definisi omzet sama dengan statistik, auth admin biasa.
 
 ## Prinsip penting yang diikuti di seluruh kode
 

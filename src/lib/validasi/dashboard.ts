@@ -17,3 +17,10 @@ export const logAktivitasQuerySchema = paginationSchema.extend({
   adminId: cuidSchema.optional(),
 });
 export type LogAktivitasQuery = z.infer<typeof logAktivitasQuerySchema>;
+
+// GET /api/admin/dashboard/omzet-harian — deret omzet per hari untuk chart
+// dashboard. Default 7 hari terakhir, max 30 (dashboard, bukan laporan).
+export const omzetHarianQuerySchema = z.object({
+  hari: z.coerce.number().int().positive().max(30).default(7),
+});
+export type OmzetHarianQuery = z.infer<typeof omzetHarianQuerySchema>;
