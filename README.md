@@ -230,6 +230,8 @@ Dua fungsi murni (tidak ada panggilan jaringan sama sekali), dipanggil langsung 
 |---|---|---|
 | `POST /api/pesanan/[id]/pembayaran` | Customer | Retry — bikin percobaan bayar BARU (bukan update yang lama) |
 | `PATCH /api/pesanan/[id]/pembayaran/bukti` | Customer | Upload bukti transfer untuk percobaan TERAKHIR |
+| `POST /api/pesanan/[id]/batal` | Customer | Batalkan pesanan sendiri — cuma saat `MENUNGGU_PEMBAYARAN`, guard atomik, stok dikembalikan, bayar aktif ikut `KADALUARSA` |
+| `GET /api/pesanan/[id]/invoice` | Customer | Unduh invoice PDF (ownership check), termasuk daftar rekening aktif |
 | `GET /api/admin/pembayaran` | Admin | List untuk panel admin, default filter `MENUNGGU_VERIFIKASI` |
 | `PATCH /api/admin/pembayaran/[id]/verifikasi` | Admin (OWNER/STAFF) | Terima/tolak |
 | `GET /api/cron/cek-kedaluwarsa` | `Authorization: Bearer $CRON_SECRET` | Dijadwalkan `vercel.json`, tiap 15 menit |
@@ -298,6 +300,8 @@ Dua fungsi murni (tidak ada panggilan jaringan sama sekali), dipanggil langsung 
 | `PATCH /api/admin/pesanan/[id]/status` | Ubah status pipeline, guard: pesanan status TERMINAL (SELESAI/DIBATALKAN) tidak bisa diubah lagi, selalu nambah `PesananStatusLog` |
 | `PATCH /api/admin/pesanan/[id]/pengiriman` | Realisasi kurir/resi, `Pengiriman` lazy-create (pola sama seperti `Keranjang`) |
 | `GET /api/admin/dashboard/statistik` | Pesanan per status, yang perlu perhatian (pembayaran/PO/komplain), produk aktif, omzet |
+| `GET /api/admin/dashboard/produk-terlaris` | Top produk (default 5, max 20) — agregat `PesananItem` per `produkId`, definisi "terjual" sama dengan omzet (bukan nunggu bayar/batal), item CUSTOM_PO tidak ikut |
+| `GET /api/admin/log-aktivitas` | List audit (sebelumnya cuma ditulis, tidak bisa dibaca) — pagination + filter `aksi` (contains) + `adminId`, terbaru dulu, include nama/email admin |
 
 **Testing**: 10 test baru (115 total, final).
 
@@ -324,6 +328,27 @@ Dua fungsi murni (tidak ada panggilan jaringan sama sekali), dipanggil langsung 
 **`PATCH /api/admin/pesanan/[id]/biaya`** — diperbaiki: sebelumnya endpoint ini bisa ikut menimpa `biayaJasaTitip`/`ongkirDomestik` walau cuma diminta ubah `ongkirChinaGudang`. Sekarang **cuma terima `{ ongkirChinaGudang }`** — dua field lain (yang sudah final & otomatis sejak checkout) selalu diambil dari nilai **tersimpan**, tidak pernah dihitung ulang atau diterima dari body.
 
 **Testing**: unit test murni untuk `hitungOngkirDomestik` (satuan gram), test eksplisit "field liar di body diabaikan total" untuk endpoint biaya, dan test kasus bug asli (`hargaAsalRmb: 15, kurs: 2300` → `hargaJualIdr` PERSIS `34500`, bukan `46580`).
+
+## Modul: Info Publik, Rekening & Penutup Gap Desain
+
+Endpoint untuk 6 kebutuhan halaman desain yang belum punya backend:
+
+| Endpoint | Auth | Catatan |
+|---|---|---|
+| `GET /api/rekening` | Publik | Daftar rekening bank AKTIF untuk halaman pembayaran (tanpa login) |
+| `GET /api/admin/rekening` | Admin (OWNER/STAFF) | Semua rekening termasuk yang nonaktif |
+| `POST /api/admin/rekening` | Admin (OWNER/STAFF) | Tambah rekening (`bank`, `noRekening`, `atasNama`) |
+| `PATCH /api/admin/rekening/[id]` | Admin (OWNER/STAFF) | Edit / toggle `aktif` (404 kalau id tidak ada) |
+| `DELETE /api/admin/rekening/[id]` | Admin (OWNER/STAFF) | Hard delete aman — tidak ada FK yang mereferensikan (404 kalau id tidak ada) |
+| `GET /api/statistik-publik` | Publik | `pesananTerkirim` (status SELESAI) + `customerAktif` (distinct customer non-batal) untuk halaman Tentang Kami. Rating TIDAK ada — belum ada sumber datanya (tidak ada tabel ulasan), frontend pakai placeholder |
+
+**Keputusan desain penting:**
+- **`RekeningBank` tabel baru** (bukan konten statis di frontend) — supaya admin bisa kelola lewat panel pengaturan (sesuai desain admin-11) tanpa deploy ulang. `Pembayaran.metode` tetap string bebas (tidak FK ke sini) supaya hapus/ganti rekening tidak merusak riwayat pembayaran lama. Seed awal: BCA + Mandiri a.n. PT Jastip China.
+- **Batal customer (`batalkanPesananCustomer`)**: guard atomik `WHERE statusPesanan = MENUNGGU_PEMBAYARAN` (race dengan verifikasi admin dimenangkan salah satu, yang kalah 409). Percobaan bayar aktif ikut `KADALUARSA` (tanpa ini retry masih bisa jalan padahal pesanan sudah batal). Stok dikembalikan, `PesananStatusLog` DIBATALKAN selalu ditulis, notifikasi in-app dibuat di dalam transaksi. TIDAK kirim WA — yang bertindak customer itu sendiri.
+- **Invoice PDF (`lib/invoice.ts` + pdfkit)**: builder murni atas data plain (tanpa prisma) supaya unit-testable tanpa DB. Font built-in Helvetica (tanpa embedding, aman di serverless). Rincian biaya mirror komponen `totalAkhir` (subtotal + jasa + ongkir china + domestik + admin).
+- **Migrasi `sinkron-kurs-berat-rekening`**: sekalian menutup drift lama — `berat_total_gram` + tabel `kurs_master` (dari modul kurs) ternyata belum pernah masuk migration files SAMA SEKALI di local maupun prod (ketahuan karena `migrate dev` gagal dengan 13 baris existing). Backfill berat dari `SUM(berat_gram × jumlah)` item per pesanan, bukan default 0 buta.
+
+**Testing**: 27 test baru (155 total, final).
 
 ## Prinsip penting yang diikuti di seluruh kode
 

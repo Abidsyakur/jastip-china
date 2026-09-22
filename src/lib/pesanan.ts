@@ -1,7 +1,7 @@
 // letak: src/lib/pesanan.ts
 import { Prisma, ProdukStatus, StatusPesanan, StatusPembayaran, SumberItem } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { kurangiStokAtomik } from "@/lib/stok";
+import { kurangiStokAtomik, kembalikanStok } from "@/lib/stok";
 import { buatNoInvoice } from "@/lib/no-invoice";
 import { AppError } from "@/lib/http-error";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
@@ -276,5 +276,80 @@ export async function updatePengiriman(pesananId: string, input: UpdatePengirima
       ...(input.statusKirim !== undefined && { statusKirim: input.statusKirim }),
       ...(input.estimasiTiba !== undefined && { estimasiTiba: input.estimasiTiba }),
     },
+  });
+}
+
+/**
+ * Customer batalkan pesanan SENDIRI. Beda dari pembatalan sistem/admin:
+ * - Cuma boleh saat status masih MENUNGGU_PEMBAYARAN (belum diproses admin
+ *   sama sekali — setelah TERVERIFIKASI, status sudah DIPROSES_ADMIN dan
+ *   tombol batal di frontend tidak ditampilkan).
+ * - Guard atomik `WHERE statusPesanan = MENUNGGU_PEMBAYARAN` (pola yang sama
+ *   seperti verifikasi pembayaran): kalau admin kebetulan verifikasi di detik
+ *   yang sama, salah satu kalah dan dilempar 409, tidak dobel diproses.
+ * - Percobaan bayar yang masih aktif (MENUNGGU_BUKTI/MENUNGGU_VERIFIKASI)
+ *   ikut ditandai KADALUARSA — tanpa ini, retry pembayaran masih bisa jalan
+ *   padahal pesanannya sudah batal.
+ * - Stok dikembalikan (kembalikanStok, toleran referensi usang — lihat lib/stok.ts).
+ * - Selalu nambah PesananStatusLog DIBATALKAN (sumber kebenaran halaman lacak).
+ * - Notifikasi in-app ke customer (dibuat DI DALAM transaksi). TIDAK kirim WA:
+ *   yang bertindak customer itu sendiri, tidak ada pihak lain yang perlu diberi tahu.
+ */
+export async function batalkanPesananCustomer(customerId: string, pesananId: string) {
+  const pesanan = await prisma.pesanan.findUnique({
+    where: { id: pesananId },
+    include: { item: true },
+  });
+
+  // 404 seragam untuk "tidak ada" maupun "bukan milik kamu" — pola yang sama
+  // seperti GET /api/pesanan/[id].
+  if (!pesanan || pesanan.customerId !== customerId) {
+    throw new PesananError("Pesanan tidak ditemukan", 404);
+  }
+
+  if (pesanan.statusPesanan !== StatusPesanan.MENUNGGU_PEMBAYARAN) {
+    throw new PesananError("Pesanan ini sudah diproses admin, tidak bisa dibatalkan sendiri", 409);
+  }
+
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const hasil = await tx.pesanan.updateMany({
+      where: { id: pesananId, statusPesanan: StatusPesanan.MENUNGGU_PEMBAYARAN },
+      data: { statusPesanan: StatusPesanan.DIBATALKAN },
+    });
+
+    if (hasil.count === 0) {
+      throw new PesananError(
+        "Pesanan ini berubah status di tengah jalan (mungkin baru diverifikasi admin), tidak jadi dibatalkan",
+        409
+      );
+    }
+
+    await tx.pesananStatusLog.create({
+      data: { pesananId, status: StatusPesanan.DIBATALKAN, catatan: "Dibatalkan customer" },
+    });
+
+    await tx.pembayaran.updateMany({
+      where: {
+        pesananId,
+        status: { in: [StatusPembayaran.MENUNGGU_BUKTI, StatusPembayaran.MENUNGGU_VERIFIKASI] },
+      },
+      data: { status: StatusPembayaran.KADALUARSA },
+    });
+
+    for (const item of pesanan.item) {
+      if (item.produkId) {
+        await kembalikanStok(tx, item.produkId, item.produkVarianId, item.jumlah);
+      }
+    }
+
+    await buatNotifikasi(
+      tx,
+      customerId,
+      pesananId,
+      `Pesanan ${pesanan.noInvoice} dibatalkan. Stok item dikembalikan.`,
+      "PEMBATALAN_PESANAN"
+    );
+
+    return { berhasil: true };
   });
 }

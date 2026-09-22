@@ -12,3 +12,5 @@ export * from "./komplain";
 export * from "./notifikasi";
 export * from "./upload";
 export * from "./kurs-master";
+export * from "./dashboard";
+export * from "./rekening";

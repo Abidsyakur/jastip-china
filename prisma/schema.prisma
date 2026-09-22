@@ -373,6 +373,22 @@ model Pengiriman {
   @@map("pengiriman")
 }
 
+// Rekening bank tujuan transfer customer. Dikelola admin (lihat endpoint
+// /api/admin/rekening), dibaca publik LEWAT /api/rekening (cuma yang aktif)
+// untuk ditampilkan di halaman pembayaran + PDF invoice. Tidak direlasikan
+// ke tabel lain — Pembayaran.metode cuma string bebas, supaya ganti/hapus
+// rekening tidak merusak riwayat pembayaran lama.
+model RekeningBank {
+  id         String   @id @default(cuid())
+  bank       String
+  noRekening String   @map("no_rekening")
+  atasNama   String   @map("atas_nama")
+  aktif      Boolean  @default(true)
+  dibuatPada DateTime @default(now()) @map("dibuat_pada")
+
+  @@map("rekening_bank")
+}
+
 // ======================================================
 // DUKUNGAN & AUDIT
 // ======================================================

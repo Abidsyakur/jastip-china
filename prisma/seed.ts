@@ -17,6 +17,23 @@ async function main() {
   }
   console.log(`✓ ${namaKategoriAwal.length} kategori awal tersedia`);
 
+  // --- Rekening bank tujuan transfer (dibaca publik via /api/rekening) ---
+  // Ditaruh SEBELUM early-return admin di bawah supaya tetap jalan walau
+  // akun admin sudah ada (seed bisa dijalankan ulang dengan aman).
+  const rekeningAwal = [
+    { id: "seed-bca", bank: "BCA", noRekening: "1234567890", atasNama: "PT Jastip China" },
+    { id: "seed-mandiri", bank: "Mandiri", noRekening: "9876543210", atasNama: "PT Jastip China" },
+  ];
+
+  for (const r of rekeningAwal) {
+    await prisma.rekeningBank.upsert({
+      where: { id: r.id },
+      update: {},
+      create: r,
+    });
+  }
+  console.log(`✓ ${rekeningAwal.length} rekening bank tersedia`);
+
   // --- Admin OWNER pertama ---
   const emailAdmin = "admin@jastipchina.local";
   const adminSudahAda = await prisma.admin.findUnique({ where: { email: emailAdmin } });
