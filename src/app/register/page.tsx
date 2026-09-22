@@ -1,130 +1,88 @@
-// src/app/register/page.tsx
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/auth-context";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAuth } from "@/contexts/auth-context";
+import { toast } from "@/components/ui/toaster";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Field, Input } from "@/components/ui/input";
 
-const registerSchema = z.object({
-  nama: z.string().min(1, "Nama wajib diisi"),
-  noWa: z.string().min(10, "Nomor WhatsApp tidak valid"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
-  confirmPassword: z.string().min(6, "Konfirmasi password minimal 6 karakter"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Password tidak cocok",
-  path: ["confirmPassword"],
-});
+// Password min 8 + huruf+angka (ikut backend passwordSchema + aturan mockup).
+const skema = z
+  .object({
+    nama: z.string().trim().min(2, "Nama minimal 2 karakter").max(100),
+    noWa: z.string().trim().min(9, "Nomor tidak valid"),
+    email: z.string().trim().email("Format email tidak valid").optional().or(z.literal("")),
+    password: z
+      .string()
+      .min(8, "Password minimal 8 karakter")
+      .regex(/^(?=.*[A-Za-z])(?=.*\d).+$/, "Password harus ada huruf dan angka"),
+    konfirmasi: z.string(),
+  })
+  .refine((d) => d.password === d.konfirmasi, {
+    message: "Konfirmasi password tidak cocok",
+    path: ["konfirmasi"],
+  });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
+type FormDaftar = z.infer<typeof skema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register: registerUser, isLoading } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-
+  const { register: daftar } = useAuth();
+  const [galat, setGalat] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-  });
+    formState: { errors, isSubmitting },
+  } = useForm<FormDaftar>({ resolver: zodResolver(skema) });
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const kirim = async (data: FormDaftar) => {
+    setGalat(null);
     try {
-      setError(null);
-      await registerUser(data.nama, data.noWa, null, data.password);
+      await daftar(data.nama, data.noWa, data.email || null, data.password);
+      toast("Akun berhasil dibuat. Silakan login.", "sukses");
       router.push("/login");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registrasi gagal");
+      setGalat(err instanceof Error ? err.message : "Registrasi gagal");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-6">Daftar Akun Baru</h1>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Nama Lengkap</label>
-            <input
-              {...register("nama")}
-              type="text"
-              placeholder="John Doe"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.nama && (
-              <span className="text-sm text-red-600">{errors.nama.message}</span>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Nomor WhatsApp</label>
-            <input
-              {...register("noWa")}
-              type="text"
-              placeholder="08xxxxxxxxxx"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.noWa && (
-              <span className="text-sm text-red-600">{errors.noWa.message}</span>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              {...register("password")}
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.password && (
-              <span className="text-sm text-red-600">{errors.password.message}</span>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Konfirmasi Password</label>
-            <input
-              {...register("confirmPassword")}
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.confirmPassword && (
-              <span className="text-sm text-red-600">{errors.confirmPassword.message}</span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isLoading ? "Loading..." : "Daftar"}
-          </button>
+    <main className="flex min-h-screen items-center justify-center px-4 py-8">
+      <Card className="w-full max-w-md p-6 md:p-8">
+        <p className="text-center font-display text-2xl font-bold text-brand">鲜货直达</p>
+        <h1 className="mt-1 text-center text-xl font-semibold">Daftar akun baru</h1>
+        <form onSubmit={handleSubmit(kirim)} className="mt-6 flex flex-col gap-4">
+          <Field label="Nama Lengkap" error={errors.nama?.message}>
+            <Input {...register("nama")} placeholder="Budi Santoso" />
+          </Field>
+          <Field label="Nomor WhatsApp" error={errors.noWa?.message}>
+            <Input {...register("noWa")} placeholder="08xxxxxxxxxx" inputMode="tel" />
+          </Field>
+          <Field label="Email (opsional)" error={errors.email?.message}>
+            <Input {...register("email")} placeholder="nama@email.com" inputMode="email" />
+          </Field>
+          <Field label="Password" error={errors.password?.message} bantu="Min 8 karakter, ada huruf dan angka">
+            <Input {...register("password")} type="password" placeholder="••••••••" />
+          </Field>
+          <Field label="Konfirmasi Password" error={errors.konfirmasi?.message}>
+            <Input {...register("konfirmasi")} type="password" placeholder="••••••••" />
+          </Field>
+          {galat && <p className="text-sm text-merah-muda">{galat}</p>}
+          <Button memuat={isSubmitting}>Daftar</Button>
         </form>
-
-        <div className="mt-4 text-center text-sm">
-          <p className="text-gray-600">
-            Sudah punya akun?{" "}
-            <a href="/login" className="text-blue-600 hover:underline">
-              Login di sini
-            </a>
-          </p>
-        </div>
-      </div>
-    </div>
+        <p className="mt-4 text-center text-sm text-ink-muda">
+          Sudah punya akun?{" "}
+          <Link href="/login" className="font-medium text-brand">
+            Masuk di sini
+          </Link>
+        </p>
+      </Card>
+    </main>
   );
 }

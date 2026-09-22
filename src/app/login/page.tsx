@@ -1,111 +1,85 @@
-// src/app/login/page.tsx
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/auth-context";
+import { Suspense, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Field, Input } from "@/components/ui/input";
 
-const loginSchema = z.object({
-  noWa: z.string().min(1, "Nomor WhatsApp wajib diisi"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
+const skema = z.object({
+  noWa: z.string().trim().min(1, "Nomor WhatsApp wajib diisi"),
+  password: z.string().min(1, "Password wajib diisi"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type FormLogin = z.infer<typeof skema>;
 
-export default function LoginPage() {
+function LoginIsi() {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-
+  const params = useSearchParams();
+  const { login } = useAuth();
+  const [galat, setGalat] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
+    formState: { errors, isSubmitting },
+  } = useForm<FormLogin>({ resolver: zodResolver(skema) });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const kirim = async (data: FormLogin) => {
+    setGalat(null);
     try {
-      setError(null);
       await login(data.noWa, data.password, "customer");
-      router.push("/");
+      router.push(params.get("dari") ?? "/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login gagal");
+      setGalat(err instanceof Error ? err.message : "Login gagal");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-6">Login Customer</h1>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Nomor WhatsApp</label>
-            <input
-              {...register("noWa")}
-              type="text"
-              placeholder="08xxxxxxxxxx"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.noWa && (
-              <span className="text-sm text-red-600">{errors.noWa.message}</span>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              {...register("password")}
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.password && (
-              <span className="text-sm text-red-600">{errors.password.message}</span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isLoading ? "Loading..." : "Login"}
-          </button>
-        </form>
-
-        <div className="mt-4 text-center text-sm">
-          <p className="text-gray-600">
-            Belum punya akun?{" "}
-            <a href="/register" className="text-blue-600 hover:underline">
-              Daftar di sini
-            </a>
-          </p>
-          <p className="text-gray-600 mt-2">
-            <a href="/forgot-password" className="text-blue-600 hover:underline">
+    <Card className="w-full max-w-md p-6 md:p-8">
+      <p className="text-center font-display text-2xl font-bold text-brand">鲜货直达</p>
+      <h1 className="mt-1 text-center text-xl font-semibold">Masuk ke akunmu</h1>
+      <form onSubmit={handleSubmit(kirim)} className="mt-6 flex flex-col gap-4">
+        <Field label="Nomor WhatsApp" error={errors.noWa?.message}>
+          <Input {...register("noWa")} placeholder="08xxxxxxxxxx" inputMode="tel" />
+        </Field>
+        <div>
+          <Field label="Password" error={errors.password?.message}>
+            <Input {...register("password")} type="password" placeholder="••••••••" />
+          </Field>
+          <div className="mt-1 text-right">
+            <Link href="/forgot-password" className="text-sm text-brand">
               Lupa password?
-            </a>
-          </p>
+            </Link>
+          </div>
         </div>
+        {galat && <p className="text-sm text-merah-muda">{galat}</p>}
+        <Button memuat={isSubmitting}>Masuk</Button>
+      </form>
+      <p className="mt-4 text-center text-sm text-ink-muda">
+        Belum punya akun?{" "}
+        <Link href="/register" className="font-medium text-brand">
+          Daftar di sini
+        </Link>
+      </p>
+      <div className="my-4 h-px bg-garis" />
+      <p className="text-center text-sm text-ink-muda">
+        Admin? <Link href="/admin/login" className="text-jade">Login Admin</Link>
+      </p>
+    </Card>
+  );
+}
 
-        <div className="mt-6 text-center text-sm">
-          <p className="text-gray-600">Admin?</p>
-          <a href="/admin/login" className="text-blue-600 hover:underline">
-            Login sebagai admin
-          </a>
-        </div>
-      </div>
-    </div>
+export default function LoginPage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center px-4 py-8">
+      <Suspense fallback={null}>
+        <LoginIsi />
+      </Suspense>
+    </main>
   );
 }

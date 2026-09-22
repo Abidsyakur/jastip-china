@@ -48,3 +48,11 @@ export const resetPasswordSchema = z.object({
   passwordBaru: passwordSchema,
 });
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+// PATCH /api/auth/profil — customer ubah data sendiri. noWa TIDAK bisa diubah
+// (identitas login + channel WA); email unik (duplikat = 409 di route).
+export const profilSchema = z.object({
+  nama: z.string().trim().min(2, "Nama minimal 2 karakter").max(100).optional(),
+  email: emailSchema.optional(),
+});
+export type ProfilInput = z.infer<typeof profilSchema>;

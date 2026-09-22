@@ -60,3 +60,11 @@ export const pesananAdminQuerySchema = paginationSchema.extend({
   status: z.nativeEnum(StatusPesanan).optional(),
 });
 export type PesananAdminQuery = z.infer<typeof pesananAdminQuerySchema>;
+
+// GET /api/lacak — lacak publik by nomor invoice (tanpa login). Respons
+// SENGAJA minimal (tanpa nominal, alamat, identitas customer) — invoice
+// cukup sebagai kapasitas akses karena 8 hex acak tidak bisa ditebak.
+export const lacakQuerySchema = z.object({
+  invoice: z.string().trim().min(1, "Nomor invoice wajib diisi").max(30),
+});
+export type LacakQuery = z.infer<typeof lacakQuerySchema>;
