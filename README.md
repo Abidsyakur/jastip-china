@@ -353,6 +353,8 @@ Endpoint untuk 6 kebutuhan halaman desain yang belum punya backend:
 
 > **Tambahan**: `GET /api/admin/dashboard/omzet-harian` (4 test baru, 159 total) — diminta untuk chart "Omzet per hari" di desain dashboard admin, yang tidak punya sumber data sebelumnya. Tidak menyentuh arsitektur yang ada: agregasi di JS (bukan raw SQL), definisi omzet sama dengan statistik, auth admin biasa.
 
+> **Tambahan 2**: `POST /api/admin/password` (4 test baru, 170 total) — admin ganti password sendiri (verifikasi lama + hash baru). Link `/admin/login` dihapus dari seluruh UI customer; akses admin via URL langsung yang hanya diketahui owner.
+
 ## Prinsip penting yang diikuti di seluruh kode
 
 1. **Panggilan jaringan eksternal (WA, dll) selalu di luar `prisma.$transaction`** — lihat `lib/notifikasi.ts`.
