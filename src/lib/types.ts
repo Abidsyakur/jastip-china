@@ -6,6 +6,7 @@ export interface ProdukListItem {
   hargaJualIdr: number | string;
   stok: number;
   status: string;
+  beratGram: number;
   kategori: { namaKategori: string };
   gambar: { urlGambar: string }[];
 }
@@ -18,6 +19,7 @@ export interface ProdukVarian {
 }
 
 export interface ProdukDetail extends ProdukListItem {
+  kategoriId: string;
   deskripsi: string | null;
   beratGram: number;
   gambar: { urlGambar: string }[];
@@ -27,6 +29,8 @@ export interface ProdukDetail extends ProdukListItem {
 export interface KeranjangItem {
   id: string;
   jumlah: number;
+  hargaSatuan: number | string;
+  subtotal: number | string;
   produk: ProdukListItem;
   produkVarian: ProdukVarian | null;
 }
