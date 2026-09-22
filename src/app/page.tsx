@@ -51,9 +51,9 @@ export default function BerandaPage() {
   const [unggulan, ...sisanya] = produk;
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-4 pb-24 md:px-6 md:pb-12">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-24 md:px-6 md:pb-12">
         <section className="py-8 md:py-12">
           <p className="font-display text-3xl font-bold text-brand">鲜货直达</p>
           <p className="mt-1 text-ink-muda">Barang China, sampai pintu rumah</p>

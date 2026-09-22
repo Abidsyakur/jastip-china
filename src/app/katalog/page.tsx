@@ -199,9 +199,9 @@ function KatalogIsi() {
 
 export default function KatalogPage() {
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-4 py-6 pb-24 md:px-6 md:pb-12">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 pb-24 md:px-6 md:pb-12">
         <h1 className="mb-4 text-2xl font-bold md:text-3xl">Katalog</h1>
         <Suspense fallback={<p className="text-sm text-ink-muda">Memuat...</p>}>
           <KatalogIsi />
