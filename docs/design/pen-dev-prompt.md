@@ -1,3 +1,8 @@
+---
+title: "Design Prompt: Jastip China E-Commerce Platform"
+tags: [pen-dev, arsip]
+tanggal: 2026-09-21
+---
 # Design Prompt: Jastip China E-Commerce Platform
 
 ## TENTANG PRODUK

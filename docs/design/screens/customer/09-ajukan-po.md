@@ -1,3 +1,8 @@
+---
+title: "Screen 09: Ajukan Custom PO"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 09: Ajukan Custom PO
 
 ## Tujuan

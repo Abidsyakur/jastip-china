@@ -1,3 +1,8 @@
+---
+title: "Mobile Patterns - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Mobile Patterns - Jastip China
 
 Pola UI spesifik mobile (bottom nav, bottom sheet, gestures, keyboards) yang tidak covered di responsive.md umum.

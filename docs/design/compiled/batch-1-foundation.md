@@ -1,4 +1,9 @@
-﻿# BATCH 1: FOUNDATION
+---
+title: "BATCH 1: FOUNDATION"
+tags: [compiled, pen-dev]
+tanggal: 2026-09-21
+---
+# BATCH 1: FOUNDATION
 
 Gabungan 10 file foundation untuk pen.dev
 

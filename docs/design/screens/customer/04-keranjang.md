@@ -1,3 +1,8 @@
+---
+title: "Screen 04: Keranjang (Cart)"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 04: Keranjang (Cart)
 
 ## Tujuan

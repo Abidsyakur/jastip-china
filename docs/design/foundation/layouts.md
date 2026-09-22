@@ -1,3 +1,8 @@
+---
+title: "Layouts - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Layouts - Jastip China
 
 Grid system, container, header/footer structure, admin sidebar layout.

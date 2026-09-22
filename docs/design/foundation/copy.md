@@ -1,3 +1,8 @@
+---
+title: "Copy & Content Strategy - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Copy & Content Strategy - Jastip China
 
 Tone of voice, button labels, error messages, empty states, dan semua teks UI.

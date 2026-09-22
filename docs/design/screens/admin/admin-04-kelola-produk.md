@@ -1,3 +1,8 @@
+---
+title: "Screen Admin 04: Kelola Produk"
+tags: [screen, admin, operasional]
+tanggal: 2026-09-21
+---
 # Screen Admin 04: Kelola Produk
 
 ## Tujuan

@@ -1,3 +1,8 @@
+---
+title: "Screen Admin 11: Pengaturan Umum"
+tags: [screen, admin, manajemen]
+tanggal: 2026-09-21
+---
 # Screen Admin 11: Pengaturan Umum
 
 ## Tujuan

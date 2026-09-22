@@ -1,4 +1,9 @@
-﻿# BATCH 5: ADMIN MANAGEMENT
+---
+title: "BATCH 5: ADMIN MANAGEMENT"
+tags: [compiled, pen-dev]
+tanggal: 2026-09-21
+---
+# BATCH 5: ADMIN MANAGEMENT
 
 Gabungan 5 file admin management screens untuk pen.dev
 

@@ -1,3 +1,8 @@
+---
+title: "Screen 19: Cara Order"
+tags: [screen, customer, statis]
+tanggal: 2026-09-21
+---
 # Screen 19: Cara Order
 
 ## Tujuan

@@ -1,3 +1,8 @@
+---
+title: "Screen 02: Katalog (Catalog Page)"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 02: Katalog (Catalog Page)
 
 ## Tujuan

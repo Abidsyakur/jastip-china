@@ -1,3 +1,8 @@
+---
+title: "Screen 08: Detail Pesanan (Lacak)"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 08: Detail Pesanan (Lacak)
 
 ## Tujuan

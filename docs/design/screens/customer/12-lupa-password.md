@@ -1,3 +1,8 @@
+---
+title: "Screen 12: Lupa Password"
+tags: [screen, customer, support]
+tanggal: 2026-09-21
+---
 # Screen 12: Lupa Password
 
 ## Tujuan

@@ -1,3 +1,8 @@
+---
+title: "Screen Admin 08: Kelola Kategori"
+tags: [screen, admin, manajemen]
+tanggal: 2026-09-21
+---
 # Screen Admin 08: Kelola Kategori
 
 ## Tujuan

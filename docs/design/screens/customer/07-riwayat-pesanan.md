@@ -1,3 +1,8 @@
+---
+title: "Screen 07: Riwayat Pesanan"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 07: Riwayat Pesanan
 
 ## Tujuan

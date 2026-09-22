@@ -1,3 +1,8 @@
+---
+title: "Screen Admin 10: Log Aktivitas"
+tags: [screen, admin, manajemen]
+tanggal: 2026-09-21
+---
 # Screen Admin 10: Log Aktivitas
 
 ## Tujuan

@@ -1,3 +1,8 @@
+---
+title: "Screen 05: Checkout"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 05: Checkout
 
 ## Tujuan

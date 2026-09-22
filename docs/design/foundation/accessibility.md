@@ -1,3 +1,8 @@
+---
+title: "Accessibility - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Accessibility - Jastip China
 
 WCAG 2.1 Level AA compliance minimum. Focus on keyboard navigation, screen reader support, dan color contrast.

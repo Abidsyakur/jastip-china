@@ -1,3 +1,8 @@
+---
+title: "Screen 14: Detail Permintaan PO"
+tags: [screen, customer, support]
+tanggal: 2026-09-21
+---
 # Screen 14: Detail Permintaan PO
 
 ## Tujuan

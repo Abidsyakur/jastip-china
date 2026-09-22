@@ -1,3 +1,8 @@
+---
+title: "Screen Admin 01: Dashboard"
+tags: [screen, admin, operasional]
+tanggal: 2026-09-21
+---
 # Screen Admin 01: Dashboard
 
 ## Tujuan

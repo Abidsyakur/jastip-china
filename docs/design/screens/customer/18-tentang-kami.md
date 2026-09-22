@@ -1,3 +1,8 @@
+---
+title: "Screen 18: Tentang Kami"
+tags: [screen, customer, statis]
+tanggal: 2026-09-21
+---
 # Screen 18: Tentang Kami
 
 ## Tujuan

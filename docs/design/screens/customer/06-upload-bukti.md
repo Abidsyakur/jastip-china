@@ -1,3 +1,8 @@
+---
+title: "Screen 06: Upload Bukti Pembayaran"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 06: Upload Bukti Pembayaran
 
 ## Tujuan

@@ -1,3 +1,8 @@
+---
+title: "Content Examples - Jastip China"
+tags: [content, contoh]
+tanggal: 2026-09-21
+---
 # Content Examples - Jastip China
 
 Realistic data untuk mockups, prototypes, dan testing. Bukan "Lorem ipsum", bukan "Product 1".

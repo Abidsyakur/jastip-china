@@ -1,3 +1,8 @@
+---
+title: "Screen 17: Bantuan (FAQ + Komplain)"
+tags: [screen, customer, support]
+tanggal: 2026-09-21
+---
 # Screen 17: Bantuan (FAQ + Komplain)
 
 ## Tujuan

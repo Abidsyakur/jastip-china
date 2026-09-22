@@ -1,3 +1,8 @@
+---
+title: "Screen 01: Beranda (Homepage)"
+tags: [screen, customer, revenue]
+tanggal: 2026-09-21
+---
 # Screen 01: Beranda (Homepage)
 
 ## Tujuan

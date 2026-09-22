@@ -1,4 +1,9 @@
-﻿# BATCH 4: ADMIN OPERATIONAL
+---
+title: "BATCH 4: ADMIN OPERATIONAL"
+tags: [compiled, pen-dev]
+tanggal: 2026-09-21
+---
+# BATCH 4: ADMIN OPERATIONAL
 
 Gabungan 6 file admin operational screens untuk pen.dev
 

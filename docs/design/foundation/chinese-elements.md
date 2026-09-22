@@ -1,3 +1,8 @@
+---
+title: "Chinese Elements Guide - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Chinese Elements Guide - Jastip China
 
 Panduan spesifik penggunaan elemen estetika China secara benar dan tidak berlebihan.

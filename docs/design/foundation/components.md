@@ -1,3 +1,8 @@
+---
+title: "Components Library - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Components Library - Jastip China
 
 18 reusable components dengan semua states (default, hover, active, focus, disabled, error, loading).

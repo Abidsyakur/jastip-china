@@ -1,3 +1,8 @@
+---
+title: "Anti-Patterns & Chinese Elements - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Anti-Patterns & Chinese Elements - Jastip China
 
 Dua panduan: apa yang HARUS dihindari (AI slop) + bagaimana Chinese aesthetic dipakai benar.

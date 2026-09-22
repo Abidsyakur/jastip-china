@@ -1,3 +1,8 @@
+---
+title: "Design System - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Design System - Jastip China
 
 Platform e-commerce jastip barang dari China ke Indonesia dengan estetika China aesthetic yang premium, hangat, dan terpercaya.

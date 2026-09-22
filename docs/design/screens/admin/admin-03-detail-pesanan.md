@@ -1,3 +1,8 @@
+---
+title: "Screen Admin 03: Detail Pesanan"
+tags: [screen, admin, operasional]
+tanggal: 2026-09-21
+---
 # Screen Admin 03: Detail Pesanan
 
 ## Tujuan

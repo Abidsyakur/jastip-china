@@ -1,4 +1,9 @@
-﻿# MASTER DESIGN SPEC: JASTIP CHINA
+---
+title: "MASTER DESIGN SPEC: JASTIP CHINA"
+tags: [compiled, pen-dev, arsip]
+tanggal: 2026-09-21
+---
+# MASTER DESIGN SPEC: JASTIP CHINA
 
 Complete design specification for pen.dev.
 Includes foundation + all 31 screens (20 customer + 11 admin), compiled from 41 design files.

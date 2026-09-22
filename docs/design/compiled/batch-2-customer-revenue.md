@@ -1,4 +1,9 @@
-﻿# BATCH 2: CUSTOMER REVENUE
+---
+title: "BATCH 2: CUSTOMER REVENUE"
+tags: [compiled, pen-dev]
+tanggal: 2026-09-21
+---
+# BATCH 2: CUSTOMER REVENUE
 
 Gabungan 9 file customer revenue screens untuk pen.dev
 

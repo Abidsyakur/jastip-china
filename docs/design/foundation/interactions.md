@@ -1,3 +1,8 @@
+---
+title: "Interactions & Micro-Interactions - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Interactions & Micro-Interactions - Jastip China
 
 Animation, hover, focus, dan transisi rules.

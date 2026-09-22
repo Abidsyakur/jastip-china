@@ -1,3 +1,8 @@
+---
+title: "Responsive Design - Jastip China"
+tags: [foundation]
+tanggal: 2026-09-21
+---
 # Responsive Design - Jastip China
 
 Mobile-first approach. Setiap page harus dapat diakses dan fungsional di semua breakpoints.

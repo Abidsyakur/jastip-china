@@ -1,3 +1,8 @@
+---
+title: "Screen 13: Akun Saya (Profile)"
+tags: [screen, customer, support]
+tanggal: 2026-09-21
+---
 # Screen 13: Akun Saya (Profile)
 
 ## Tujuan
