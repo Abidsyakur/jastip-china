@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { AdminShell } from "@/components/layout/admin-shell";
 import { Button } from "@/components/ui/button";
@@ -9,16 +10,22 @@ import { Field, Input } from "@/components/ui/input";
 import { SkeletonBar } from "@/components/ui/feedback";
 import { toast } from "@/components/ui/toaster";
 import { useRequireAdmin } from "@/components/auth-guard";
+import { useAuth } from "@/contexts/auth-context";
 import type { Rekening } from "@/lib/types";
 
 type RekeningAdmin = Rekening & { aktif: boolean };
 
 export default function AdminPengaturanPage() {
   const { user, isLoading } = useRequireAdmin();
+  const { logout } = useAuth();
+  const router = useRouter();
   const [items, setItems] = useState<RekeningAdmin[]>([]);
   const [bank, setBank] = useState("");
   const [noRekening, setNoRekening] = useState("");
   const [atasNama, setAtasNama] = useState("PT Jastip China");
+  const [pwLama, setPwLama] = useState("");
+  const [pwBaru, setPwBaru] = useState("");
+  const [pwKonfirm, setPwKonfirm] = useState("");
   const [siap, setSiap] = useState(false);
   const [kerja, setKerja] = useState(false);
 
@@ -78,11 +85,58 @@ export default function AdminPengaturanPage() {
     }
   };
 
+  const gantiPassword = async () => {
+    if (!pwLama) {
+      toast("Isi password saat ini", "error");
+      return;
+    }
+    if (pwBaru.length < 8) {
+      toast("Password baru minimal 8 karakter", "error");
+      return;
+    }
+    if (pwBaru !== pwKonfirm) {
+      toast("Konfirmasi password tidak cocok", "error");
+      return;
+    }
+    setKerja(true);
+    try {
+      await api("/api/admin/password", {
+        method: "POST",
+        body: { passwordLama: pwLama, passwordBaru: pwBaru },
+      });
+      toast("Password diganti. Silakan login ulang.", "sukses");
+      await logout();
+      router.push("/admin/login");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Gagal", "error");
+    } finally {
+      setKerja(false);
+    }
+  };
+
   return (
     <AdminShell>
       <h1 className="mb-4 text-2xl font-bold">Pengaturan Umum</h1>
 
       <Card className="p-4">
+        <p className="mb-1 font-display font-bold">Ganti Password</p>
+        <div className="grid gap-2 md:grid-cols-3">
+          <Field label="Password Saat Ini">
+            <Input type="password" value={pwLama} onChange={(e) => setPwLama(e.target.value)} placeholder="••••••••" />
+          </Field>
+          <Field label="Password Baru" bantu="Min 8 karakter">
+            <Input type="password" value={pwBaru} onChange={(e) => setPwBaru(e.target.value)} placeholder="••••••••" />
+          </Field>
+          <Field label="Konfirmasi Password Baru">
+            <Input type="password" value={pwKonfirm} onChange={(e) => setPwKonfirm(e.target.value)} placeholder="••••••••" />
+          </Field>
+        </div>
+        <Button ukuran="sm" className="mt-2" disabled={kerja} onClick={gantiPassword}>
+          Ganti Password
+        </Button>
+      </Card>
+
+      <Card className="mt-4 p-4">
         <p className="mb-1 font-display font-bold">Rekening Bank</p>
         <p className="mb-3 text-sm text-ink-muda">Dipakai customer buat transfer pembayaran. Minimal 1 rekening harus ada.</p>
         {!siap || isLoading || !user ? (

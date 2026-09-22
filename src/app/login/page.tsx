@@ -67,8 +67,8 @@ function LoginIsi() {
         </Link>
       </p>
       <div className="my-4 h-px bg-garis" />
-      <p className="text-center text-sm text-ink-muda">
-        Admin? <Link href="/admin/login" className="text-jade">Login Admin</Link>
+      <p className="text-center text-xs text-ink-muda">
+        Butuh bantuan? Chat admin via WhatsApp di 0812-3456-7890.
       </p>
     </Card>
   );

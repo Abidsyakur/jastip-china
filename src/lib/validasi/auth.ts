@@ -56,3 +56,11 @@ export const profilSchema = z.object({
   email: emailSchema.optional(),
 });
 export type ProfilInput = z.infer<typeof profilSchema>;
+
+// POST /api/admin/password — admin ganti password sendiri. Harus tahu yang
+// lama (verifikasi dulu), yang baru ikut aturan password standar (min 8).
+export const gantiPasswordAdminSchema = z.object({
+  passwordLama: z.string().min(1, "Password saat ini wajib diisi"),
+  passwordBaru: passwordSchema,
+});
+export type GantiPasswordAdminInput = z.infer<typeof gantiPasswordAdminSchema>;
