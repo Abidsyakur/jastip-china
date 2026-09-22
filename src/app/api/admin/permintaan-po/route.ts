@@ -20,6 +20,8 @@ export async function GET(req: NextRequest) {
     const [items, total] = await Promise.all([
       prisma.permintaanPo.findMany({
         where,
+        // Customer ikut serta — panel review butuh nama/kontak tanpa request kedua.
+        include: { customer: { select: { nama: true, noWa: true, email: true } } },
         orderBy: { tglSubmit: "asc" }, // FIFO
         skip: (page - 1) * limit,
         take: limit,

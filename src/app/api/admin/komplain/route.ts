@@ -20,7 +20,22 @@ export async function GET(req: NextRequest) {
     const [items, total] = await Promise.all([
       prisma.komplain.findMany({
         where,
-        include: { pesananItem: true },
+        // Panel tindak lanjut butuh: nama item + invoice + kontak customer +
+        // riwayat log — diambil sekaligus supaya tidak request berlapis.
+        include: {
+          pesananItem: {
+            include: {
+              pesanan: {
+                select: {
+                  id: true,
+                  noInvoice: true,
+                  customer: { select: { nama: true, noWa: true } },
+                },
+              },
+            },
+          },
+          log: { include: { admin: { select: { nama: true } } }, orderBy: { waktu: "asc" } },
+        },
         orderBy: { id: "asc" }, // FIFO
         skip: (page - 1) * limit,
         take: limit,
