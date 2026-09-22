@@ -36,8 +36,8 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError(null);
-      await registerUser(data.nama, data.noWa, data.password);
-      router.push("/");
+      await registerUser(data.nama, data.noWa, null, data.password);
+      router.push("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registrasi gagal");
     }

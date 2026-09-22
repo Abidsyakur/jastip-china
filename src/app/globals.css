@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+@theme {
+  /* Palet brand Jastip China — sumber: design-system.md, dikunci pen.dev */
+  --color-brand: #c8102e;
+  --color-brand-tua: #a00d25;
+  --color-gold: #d4af37;
+  --color-gold-tua: #b5941f;
+  --color-jade: #7c9885;
+  --color-cream: #faf8f3;
+  --color-krim: #f7f3ec;
+  --color-ink: #2c1810;
+  --color-ink-muda: #6b5d52;
+  --color-garis: #e8dcc8;
+  --color-merah-muda: #9b4d50;
+
+  --font-display: var(--font-noto), "Noto Serif SC", serif;
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -94,6 +112,11 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-cream text-ink font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
   }
 }
