@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Palet brand Jastip China — sumber: design-system.md, dikunci pen.dev */
-  --color-brand: #c8102e;
-  --color-brand-tua: #a00d25;
+  /* Palet brand Jastip China — sumber: design-system.md, dikunci pen.dev.
+     Revisi 2026-09-22: primer customer maroon #4a2318 (ganti merah #C8102E),
+     emas tetap. */
+  --color-brand: #4a2318;
+  --color-brand-tua: #3a1c14;
   --color-gold: #d4af37;
   --color-gold-tua: #b5941f;
   --color-jade: #7c9885;

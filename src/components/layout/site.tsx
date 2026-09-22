@@ -74,7 +74,8 @@ export function SiteFooter() {
           <p className="mb-2 text-sm font-semibold">Bantuan</p>
           <div className="flex flex-col gap-1 text-sm opacity-80">
             <Link href="/bantuan">FAQ</Link>
-            <Link href="/tentang-kami">Tentang Kami</Link>
+            <Link href="/syarat-layanan">Syarat Layanan</Link>
+            <Link href="/kebijakan-refund">Kebijakan Refund</Link>
           </div>
         </div>
         <div>

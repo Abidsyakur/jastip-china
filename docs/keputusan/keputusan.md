@@ -33,7 +33,7 @@ Catatan keputusan yang mengikat. Kalau ada yang mau diubah, diskusikan dulu — 
 
 ## Desain
 
-- **Palet**: Chinese Red `#C8102E`, Gold `#D4AF37`, Jade `#7C9885`, Cream `#FAF8F3`, Ink `#2C1810`. Lihat [[design-system]].
+- **Palet**: Maroon `#4a2318` (primer, revisi 2026-09-22 ganti merah `#C8102E`), Gold `#D4AF37`, Jade `#7C9885`, Cream `#FAF8F3`, Ink `#2C1810`. Lihat [[design-system]].
 - **Tipografi**: Noto Serif SC (heading) + Inter (body). Dilarang Inter/Poppins/Playfair untuk heading.
 - **Tanpa dark mode** (MVP). Tanpa gradient hero, tanpa label all-caps, tanpa panah di tombol, tanpa middle-dot.
 - **Satu momen "berani"**: transisi buka [[03-detail-produk]]. Sisanya diam.
