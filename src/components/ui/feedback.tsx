@@ -19,8 +19,26 @@ export function EmptyState({
   );
 }
 
-export function SkeletonBar({ lebar = "w-full" }: { lebar?: string }) {
-  return <div className={`h-4 animate-pulse rounded bg-krim ${lebar}`} />;
+export function SkeletonBar({ 
+  lebar = "w-full", 
+  tinggi = "h-4", 
+  className = "" 
+}: { 
+  lebar?: string;
+  tinggi?: string;
+  className?: string;
+}) {
+  return <div className={`${tinggi} ${lebar} animate-pulse rounded bg-krim ${className}`} />;
+}
+
+export function SkeletonText({ baris = 1 }: { baris?: number }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {Array.from({ length: baris }).map((_, i) => (
+        <SkeletonBar key={i} />
+      ))}
+    </div>
+  );
 }
 
 export function SkeletonCard() {
