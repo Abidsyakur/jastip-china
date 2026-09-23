@@ -33,6 +33,7 @@ export default function AdminDetailPesananPage() {
   const [alasanTolak, setAlasanTolak] = useState("");
   const [tanyaTolak, setTanyaTolak] = useState(false);
   const [resi, setResi] = useState("");
+  const [kurir, setKurir] = useState("");
   const [statusBaru, setStatusBaru] = useState("DIKONSOLIDASI_KIRIM");
   const [ongkirChina, setOngkirChina] = useState("");
   const [kerja, setKerja] = useState(false);
@@ -41,6 +42,7 @@ export default function AdminDetailPesananPage() {
     const res = await api<{ pesanan: AdminPesanan }>(`/api/admin/pesanan/${id}`);
     setP(res.pesanan);
     setResi(res.pesanan.pengiriman?.noResi ?? "");
+    setKurir(res.pesanan.pengiriman?.kurir ?? "");
   }, [id]);
 
   useEffect(() => {
@@ -153,14 +155,23 @@ export default function AdminDetailPesananPage() {
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Card className="p-4 text-sm">
           <p className="mb-2 font-display font-bold">Update Pengiriman</p>
-          <Field label="No. Resi">
-            <Input value={resi} onChange={(e) => setResi(e.target.value)} placeholder="JNE-1234567890" />
+          <Field label="Kurir">
+            <Select value={kurir} onChange={(e) => setKurir(e.target.value)}>
+              <option value="">Pilih Kurir</option>
+              <option value="jnt">J&T</option>
+              <option value="shopee_express">Shopee Express</option>
+            </Select>
           </Field>
+          <div className="mt-3">
+            <Field label="No. Resi">
+              <Input value={resi} onChange={(e) => setResi(e.target.value)} placeholder="JNE-1234567890" />
+            </Field>
+          </div>
           <Button
-            ukuran="sm" className="mt-2" disabled={kerja || !resi.trim()}
-            onClick={() => jalan(() => api(`/api/admin/pesanan/${id}/pengiriman`, { method: "PATCH", body: { noResi: resi } }), "Resi diupdate")}
+            ukuran="sm" className="mt-2" disabled={kerja || (!resi.trim() && !kurir.trim())}
+            onClick={() => jalan(() => api(`/api/admin/pesanan/${id}/pengiriman`, { method: "PATCH", body: { kurir: kurir || undefined, noResi: resi || undefined } }), "Info pengiriman diupdate")}
           >
-            Update Resi
+            Update Pengiriman
           </Button>
           <div className="mt-3">
             <Field label="Ubah Status">
