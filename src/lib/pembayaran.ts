@@ -156,7 +156,7 @@ export async function verifikasiPembayaran(
 
   const diterima = input.status === StatusPembayaran.TERVERIFIKASI;
   const pesanNotif = diterima
-    ? `Halo ${pembayaran.pesanan.customer.nama}, Pembayaran pesanan ${pembayaran.pesanan.noInvoice} sebesar ${pembayaran.jumlahBayar} sudah kami terima dan sedang diproses. Terima kasih telah berbelanja di Jastip China!`
+    ? `Halo ${pembayaran.pesanan.customer.nama}, Pembayaran pesanan ${pembayaran.pesanan.noInvoice} sebesar ${pembayaran.jumlahBayar} sudah kami terima dan sedang diproses. Terima kasih telah berbelanja di Jastip Nihao!`
     : `Pembayaran untuk pesanan ${pembayaran.pesanan.noInvoice} ditolak: ${input.catatanAdmin}. Silakan ajukan pembayaran ulang.`;
 
   const hasil = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
