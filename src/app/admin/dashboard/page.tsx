@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
           {terbaru.map((p) => (
             <Link key={p.id} href={`/admin/pesanan/${p.id}`} className="flex items-center justify-between gap-2 py-2">
               <span className="font-mono">{p.noInvoice}</span>
-              <Badge status={p.statusPesanan} />
+              <Badge status={p.statusPesanan} konteks="pesanan" />
               <span className="font-medium">{rupiah(p.totalAkhir)}</span>
             </Link>
           ))}

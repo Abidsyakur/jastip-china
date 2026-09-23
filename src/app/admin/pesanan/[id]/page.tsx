@@ -83,7 +83,7 @@ export default function AdminDetailPesananPage() {
       </p>
       <div className="mt-1 flex flex-wrap items-center gap-2">
         <h1 className="font-mono text-xl font-bold">{p.noInvoice}</h1>
-        <Badge status={p.statusPesanan} />
+        <Badge status={p.statusPesanan} konteks="pesanan" />
       </div>
       <p className="text-sm text-ink-muda">
         {formatTanggalWaktu(p.tglPesan)} — {p.customer.nama} ({p.customer.noWa})

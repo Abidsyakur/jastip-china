@@ -80,7 +80,7 @@ function LacakIsi({ awal }: { awal: string }) {
         <Card className="mt-4 p-4">
           <div className="flex items-center justify-between gap-2">
             <p className="font-mono text-sm font-semibold">{hasil.noInvoice}</p>
-            <Badge status={hasil.statusPesanan} />
+            <Badge status={hasil.statusPesanan} konteks="pesanan" />
           </div>
           <p className="text-xs text-ink-muda">{formatTanggalWaktu(hasil.tglPesan)}</p>
           <div className="mt-3">

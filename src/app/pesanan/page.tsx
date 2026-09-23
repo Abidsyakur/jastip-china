@@ -115,7 +115,7 @@ function RiwayatIsi() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-mono text-sm font-semibold">{p.noInvoice}</p>
-                    <Badge status={p.statusPesanan} />
+                    <Badge status={p.statusPesanan} konteks="pesanan" />
                   </div>
                   <p className="mt-1 text-xs text-ink-muda">{formatTanggalWaktu(p.tglPesan)}</p>
                   <div className="mt-1 flex items-center justify-between">

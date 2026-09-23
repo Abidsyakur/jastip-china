@@ -108,7 +108,7 @@ export default function AdminPesananPage() {
                     </td>
                     <td className="p-3">{formatTanggal(p.tglPesan)}</td>
                     <td className="p-3 font-medium">{rupiah(p.totalAkhir)}</td>
-                    <td className="p-3"><Badge status={p.statusPesanan} /></td>
+                    <td className="p-3"><Badge status={p.statusPesanan} konteks="pesanan" /></td>
                   </tr>
                 ))}
               </tbody>
