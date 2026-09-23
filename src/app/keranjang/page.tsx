@@ -80,9 +80,9 @@ export default function KeranjangPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen">
+      <div className="flex min-h-screen flex-col">
         <SiteHeader />
-        <main className="mx-auto max-w-5xl px-4 py-6">
+        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-24 md:px-6 md:pb-12">
           <SkeletonBar /> <div className="mt-2" /> <SkeletonBar /> <div className="mt-2" /> <SkeletonBar />
         </main>
       </div>
@@ -90,9 +90,9 @@ export default function KeranjangPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 py-6 pb-24 md:px-6 md:pb-12">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-24 md:px-6 md:pb-12">
         <h1 className="mb-4 text-2xl font-bold md:text-3xl">Keranjang Belanja</h1>
 
         {memuat ? (

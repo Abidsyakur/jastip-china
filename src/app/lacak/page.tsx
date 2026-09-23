@@ -106,9 +106,9 @@ function LacakIsi({ awal }: { awal: string }) {
 
 export default function LacakPage() {
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-6 pb-24 md:pb-12">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6 pb-24 md:pb-12">
         <h1 className="mb-4 text-2xl font-bold md:text-3xl">Lacak Pesanan</h1>
         <Suspense fallback={<SkeletonBar />}>
           <LacakBoot />
