@@ -8,3 +8,5 @@ export function labelKurir(kode: string | null | undefined): string {
   if (!kode) return "-";
   return LABEL_KURIR[kode] ?? kode;
 }
+
+export default labelKurir;

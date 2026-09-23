@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { rupiah } from "@/lib/format";
 import { Tag } from "@/components/ui/badge";
 
@@ -23,14 +24,19 @@ export function ProductCard({ p, unggulan = false }: { p: KartuProduk; unggulan?
     >
       <div className={`relative bg-krim ${unggulan ? "aspect-[2/1]" : "aspect-square"}`}>
         {p.gambar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.gambar} alt={p.nama} className="h-full w-full object-cover" loading="lazy" />
+          <Image
+            src={p.gambar}
+            alt={p.nama}
+            fill
+            sizes="(max-width: 768px) 50vw, 33vw"
+            className="object-cover"
+          />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-4xl text-ink-muda/40">
             ○
           </div>
         )}
-        <div className="absolute left-2 top-2">
+        <div className="absolute left-2 top-2 z-10">
           {habis ? (
             <Tag tone="netral">Stok Habis</Tag>
           ) : p.stok < 5 ? (
