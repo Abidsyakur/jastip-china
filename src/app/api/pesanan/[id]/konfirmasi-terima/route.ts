@@ -31,13 +31,13 @@ export async function POST(req: NextRequest, { params }: Konteks) {
       );
     }
 
-    // Update status ke SUDAH_SAMPAI + catat di log
+    // Update status ke SELESAI + catat di log
     await prisma.pesanan.update({
       where: { id },
       data: {
-        statusPesanan: StatusPesanan.SUDAH_SAMPAI,
+        statusPesanan: StatusPesanan.SELESAI,
         statusLog: {
-          create: { status: StatusPesanan.SUDAH_SAMPAI },
+          create: { status: StatusPesanan.SELESAI },
         },
       },
     });

@@ -173,7 +173,7 @@ export class PesananError extends AppError {
   }
 }
 
-const STATUS_TERMINAL = new Set<StatusPesanan>([StatusPesanan.SUDAH_SAMPAI, StatusPesanan.DIBATALKAN]);
+const STATUS_TERMINAL = new Set<StatusPesanan>([StatusPesanan.SELESAI, StatusPesanan.DIBATALKAN]);
 
 /**
  * Admin isi biayaJasaTitip/ongkirDomestik (di-set 0 saat checkout, lihat
@@ -207,7 +207,7 @@ export async function updateBiayaPesanan(pesananId: string, input: UpdateBiayaIn
 
 /**
  * Admin ubah status pesanan (pipeline pengiriman). Guard ringan: pesanan yang
- * sudah di status TERMINAL (SUDAH_SAMPAI/DIBATALKAN) tidak bisa diubah lagi lewat
+ * sudah di status TERMINAL (SELESAI/DIBATALKAN) tidak bisa diubah lagi lewat
  * endpoint ini. SETIAP perubahan WAJIB nambah baris PesananStatusLog (sumber
  * kebenaran untuk halaman "Lacak status" customer), bukan cuma update kolom.
  */
