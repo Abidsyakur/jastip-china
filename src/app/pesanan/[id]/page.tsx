@@ -53,6 +53,12 @@ export default function DetailPesananPage() {
     );
   }
 
+  // Countdown pembayaran (24h dari tglPesan)
+  const sisaBayarMs =
+    p.statusPesanan === "MENUNGGU_PEMBAYARAN"
+      ? new Date(p.tglPesan).getTime() + 24 * 60 * 60 * 1000 - Date.now()
+      : 0;
+
   const dibatalkan = p.statusPesanan === "DIBATALKAN";
   const indeks = dibatalkan ? 0 : (STATUS_KE_INDEKS[p.statusPesanan] ?? 0);
   const waktuPerTahap = TAHAP.map((_, i) => {
@@ -119,6 +125,15 @@ export default function DetailPesananPage() {
           <Badge status={p.statusPesanan} />
         </div>
         <p className="text-sm text-ink-muda">{formatTanggalWaktu(p.tglPesan)}</p>
+
+        {sisaBayarMs > 0 && (
+          <Card className="mt-4 border-l-4 border-l-red-500 p-4">
+            <p className="font-semibold text-red-600">
+              Sisa waktu pembayaran: {Math.floor(sisaBayarMs / (1000 * 60 * 60))} jam{" "}
+              {Math.floor((sisaBayarMs % (1000 * 60 * 60)) / (1000 * 60))} menit
+            </p>
+          </Card>
+        )}
 
         <Card className="mt-4 p-4">
           <StatusPipeline

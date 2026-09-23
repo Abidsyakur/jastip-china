@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { MessageCircle } from "lucide-react";
 
 const MENU = [
   { href: "/", label: "Beranda" },
@@ -55,7 +56,17 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-12 border-t border-garis bg-ink text-cream">
+    <>
+      <a
+        href="https://wa.me/6281234567890"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105 md:bottom-6"
+        aria-label="Chat via WhatsApp"
+      >
+        <MessageCircle size={28} />
+      </a>
+      <footer className="mt-12 border-t border-garis bg-ink text-cream">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4 md:px-6">
         <div>
           {/* Logo versi putih (filter) — file asli ber-background putih,
@@ -89,6 +100,7 @@ export function SiteFooter() {
           <p className="text-sm opacity-80">Senin sampai Sabtu 09.00 sampai 17.00</p>
         </div>
       </div>
-    </footer>
+      </footer>
+    </>
   );
 }
