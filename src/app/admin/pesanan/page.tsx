@@ -13,7 +13,7 @@ import { toast } from "@/components/ui/toaster";
 import { useRequireAdmin } from "@/components/auth-guard";
 import type { AdminPesanan } from "@/lib/types-admin";
 
-const STATUS = ["", "MENUNGGU_PEMBAYARAN", "DIPROSES_ADMIN", "DIKONSOLIDASI_KIRIM", "TIBA_KIRIM_LOKAL", "SELESAI", "DIBATALKAN"];
+const STATUS = ["", "MENUNGGU_PEMBAYARAN", "DIPROSES_ADMIN", "DIKONSOLIDASI_KIRIM", "TIBA_KIRIM_LOKAL", "SUDAH_SAMPAI", "DIBATALKAN"];
 
 export default function AdminPesananPage() {
   const { user, isLoading } = useRequireAdmin();

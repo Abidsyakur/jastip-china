@@ -10,7 +10,7 @@ import { prisma } from "@/lib/db";
 // (tidak ada tabel ulasan), jadi frontend tampilkan placeholder/TODO.
 export async function GET() {
   const [pesananTerkirim, grupCustomer] = await Promise.all([
-    prisma.pesanan.count({ where: { statusPesanan: StatusPesanan.SELESAI } }),
+    prisma.pesanan.count({ where: { statusPesanan: StatusPesanan.SUDAH_SAMPAI } }),
     prisma.pesanan.groupBy({
       by: ["customerId"],
       where: { statusPesanan: { not: StatusPesanan.DIBATALKAN } },

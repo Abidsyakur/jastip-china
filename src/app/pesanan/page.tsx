@@ -24,7 +24,7 @@ function cocokFilter(status: string, filter: string): boolean {
     case "Dikirim":
       return status === "TIBA_KIRIM_LOKAL";
     case "Selesai":
-      return status === "SELESAI";
+      return status === "SUDAH_SAMPAI";
     default:
       return true;
   }

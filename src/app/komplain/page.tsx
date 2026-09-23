@@ -46,7 +46,7 @@ function KomplainIsi({ pesananAwal }: { pesananAwal: string }) {
   useEffect(() => {
     if (isLoading || !user) return;
     api<{ items: Pesanan[] }>("/api/pesanan")
-      .then((r) => setDaftar(r.items.filter((p) => p.statusPesanan === "SELESAI")))
+      .then((r) => setDaftar(r.items.filter((p) => p.statusPesanan === "SUDAH_SAMPAI")))
       .catch((err) => toast(err.message, "error"));
   }, [isLoading, user]);
 

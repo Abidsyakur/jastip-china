@@ -23,9 +23,9 @@ const INDEKS: Record<string, number> = {
   DIPROSES_ADMIN: 1,
   DIKONSOLIDASI_KIRIM: 2,
   TIBA_KIRIM_LOKAL: 3,
-  SELESAI: 4,
+  SUDAH_SAMPAI: 4,
 };
-const STATUS_OPSI = ["DIPROSES_ADMIN", "DIKONSOLIDASI_KIRIM", "TIBA_KIRIM_LOKAL", "SELESAI", "DIBATALKAN"];
+const STATUS_OPSI = ["DIPROSES_ADMIN", "DIKONSOLIDASI_KIRIM", "TIBA_KIRIM_LOKAL", "SUDAH_SAMPAI", "DIBATALKAN"];
 
 export default function AdminDetailPesananPage() {
   const { id } = useParams<{ id: string }>();
