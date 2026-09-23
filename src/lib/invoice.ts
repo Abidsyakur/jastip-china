@@ -63,24 +63,26 @@ export function bangunInvoicePdf(data: InvoiceData): Promise<Buffer> {
     doc.on("end", () => resolve(Buffer.concat(potongan)));
     doc.on("error", reject);
 
-    // Kepala — font built-in Helvetica (tidak perlu embedding, aman di serverless)
-    doc.font("Helvetica-Bold").fontSize(20).text("Jastip China");
-    doc.font("Helvetica").fontSize(10).fillColor("#666666").text("Invoice pesanan jastip barang China");
+    // Gunakan font default PDFKit (built-in, tanpa external dependency)
+    // PDFKit sudah include Helvetica built-in, tapi di serverless Vercel
+    // tidak bisa load external fonts. Gunakan API default saja.
+    doc.fontSize(20).text("Jastip China");
+    doc.fontSize(10).fillColor("#666666").text("Invoice pesanan jastip barang China");
     doc.moveDown();
     doc.fillColor("#000000").fontSize(12);
-    doc.font("Helvetica-Bold").text(`No. Invoice: ${data.noInvoice}`);
-    doc.font("Helvetica").fontSize(10).text(`Tanggal pesan: ${tanggal(data.tglPesan)}`);
+    doc.text(`No. Invoice: ${data.noInvoice}`);
+    doc.fontSize(10).text(`Tanggal pesan: ${tanggal(data.tglPesan)}`);
     doc.moveDown();
 
-    doc.font("Helvetica-Bold").fontSize(11).text("Ditagihkan ke:");
-    doc.font("Helvetica").fontSize(10).text(data.customerNama);
+    doc.fontSize(11).text("Ditagihkan ke:");
+    doc.fontSize(10).text(data.customerNama);
     doc.text(data.customerKontak);
     doc.text(data.alamatLengkap, { width: 500 });
     doc.moveDown();
 
-    // Item — baris teks sederhana (bukan tabel presisi, cukup terbaca & stabil)
-    doc.font("Helvetica-Bold").fontSize(11).text("Item pesanan:");
-    doc.font("Helvetica").fontSize(10);
+    // Item — baris teks sederhana
+    doc.fontSize(11).text("Item pesanan:");
+    doc.fontSize(10);
     for (const item of data.items) {
       const nama = item.varian ? `${item.nama} (${item.varian})` : item.nama;
       doc.text(`${nama} — ${item.jumlah} x ${rupiah(item.hargaSatuan)} = ${rupiah(item.hargaSatuan * item.jumlah)}`, {
@@ -89,10 +91,9 @@ export function bangunInvoicePdf(data: InvoiceData): Promise<Buffer> {
     }
     doc.moveDown();
 
-    // Rincian biaya — mirror persis komponen totalAkhir di lib/pesanan.ts
-    // (subtotal + jasa + ongkir china + ongkir domestik + admin)
-    doc.font("Helvetica-Bold").fontSize(11).text("Rincian biaya:");
-    doc.font("Helvetica").fontSize(10);
+    // Rincian biaya
+    doc.fontSize(11).text("Rincian biaya:");
+    doc.fontSize(10);
     doc.text(`Subtotal produk: ${rupiah(data.subtotalProduk)}`);
     doc.text(`Biaya jasa titip: ${rupiah(data.biayaJasaTitip)}`);
     doc.text(`Ongkir China ke gudang: ${rupiah(data.ongkirChinaGudang)}`);
@@ -101,19 +102,19 @@ export function bangunInvoicePdf(data: InvoiceData): Promise<Buffer> {
       doc.text(`Biaya admin pembayaran: ${rupiah(data.biayaAdminPayment)}`);
     }
     doc.moveDown();
-    doc.font("Helvetica-Bold").fontSize(13).text(`Total: ${rupiah(data.totalAkhir)}`);
+    doc.fontSize(13).text(`Total: ${rupiah(data.totalAkhir)}`);
     doc.moveDown();
 
     if (data.rekening.length > 0) {
-      doc.font("Helvetica-Bold").fontSize(11).text("Transfer ke:");
-      doc.font("Helvetica").fontSize(10);
+      doc.fontSize(11).text("Transfer ke:");
+      doc.fontSize(10);
       for (const r of data.rekening) {
         doc.text(`${r.bank} — ${r.noRekening} a.n. ${r.atasNama}`);
       }
       doc.moveDown();
     }
 
-    doc.font("Helvetica").fontSize(9).fillColor("#666666").text("Simpan invoice ini sebagai bukti pesananmu.");
+    doc.fontSize(9).fillColor("#666666").text("Simpan invoice ini sebagai bukti pesananmu.");
     doc.end();
   });
 }
