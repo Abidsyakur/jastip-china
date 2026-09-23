@@ -18,8 +18,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-garis bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link href="/" className="font-display text-xl font-bold text-brand">
-          Jastip China
+        <Link href="/" aria-label="Beranda Jastip China">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-10 w-auto" />
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {MENU.map((m) => (
@@ -56,7 +57,10 @@ export function SiteFooter() {
     <footer className="mt-12 border-t border-garis bg-ink text-cream">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4 md:px-6">
         <div>
-          <p className="font-display text-lg font-bold">Jastip China</p>
+          <span className="inline-block rounded-lg bg-cream p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-12 w-auto" />
+          </span>
           <p className="mt-2 text-sm opacity-80">
             Titip barang China mudah, aman, sampai depan pintu.
           </p>
