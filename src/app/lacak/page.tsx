@@ -29,7 +29,7 @@ const INDEKS: Record<string, number> = {
   DIPROSES_ADMIN: 1,
   DIKONSOLIDASI_KIRIM: 2,
   TIBA_KIRIM_LOKAL: 3,
-  SUDAH_SAMPAI: 4,
+  SELESAI: 4,
 };
 
 function LacakIsi({ awal }: { awal: string }) {

@@ -6,7 +6,7 @@ const INFO_STATUS: Record<string, { label: string; kelas: string }> = {
   DIPROSES_ADMIN: { label: "Diproses Admin", kelas: "bg-brand text-white" },
   DIKONSOLIDASI_KIRIM: { label: "Dikonsolidasi Kirim", kelas: "bg-ink text-white" },
   TIBA_KIRIM_LOKAL: { label: "Tiba di Gudang Lokal", kelas: "bg-jade text-white" },
-  SELESAI: { label: "Selesai", kelas: "bg-jade text-white" },
+  SELESAI: { label: "Sudah Sampai", kelas: "bg-jade text-white" },
   DIBATALKAN: { label: "Dibatalkan", kelas: "bg-merah-muda text-white" },
   MENUNGGU_BUKTI: { label: "Menunggu Bukti", kelas: "bg-gold text-white" },
   MENUNGGU_VERIFIKASI: { label: "Menunggu Verifikasi", kelas: "bg-gold text-white" },

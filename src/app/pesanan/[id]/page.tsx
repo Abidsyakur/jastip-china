@@ -23,7 +23,7 @@ const STATUS_KE_INDEKS: Record<string, number> = {
   DIPROSES_ADMIN: 1,
   DIKONSOLIDASI_KIRIM: 2,
   TIBA_KIRIM_LOKAL: 3,
-  SUDAH_SAMPAI: 4,
+  SELESAI: 4,
 };
 
 export default function DetailPesananPage() {
@@ -207,7 +207,7 @@ export default function DetailPesananPage() {
           {p.statusPesanan === "TIBA_KIRIM_LOKAL" && (
             <Button onClick={konfirmasiTerima}>Konfirmasi Sudah Terima</Button>
           )}
-          {p.statusPesanan === "SUDAH_SAMPAI" && (
+          {p.statusPesanan === "SELESAI" && (
             <Link href={`/komplain?pesananId=${id}`}><Button varian="secondary">Ajukan Komplain</Button></Link>
           )}
           <Button varian="secondary" memuat={unduh} onClick={unduhInvoice}>
