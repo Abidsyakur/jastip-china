@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth-context";
 const MENU = [
   { href: "/", label: "Beranda" },
   { href: "/katalog", label: "Katalog" },
+  { href: "/ajukan-po", label: "Ajukan PO" },
   { href: "/cara-order", label: "Cara Order" },
   { href: "/lacak", label: "Lacak Pesanan" },
 ];
