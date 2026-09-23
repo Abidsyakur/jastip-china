@@ -114,7 +114,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-cream text-ink font-sans antialiased;
+    @apply bg-[#4a2318] text-[#faf8f3] font-sans antialiased;
   }
   h1,
   h2,

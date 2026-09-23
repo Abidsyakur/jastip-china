@@ -23,7 +23,7 @@ interface HasilLacak {
   pengiriman: { kurir: string | null; noResi: string | null } | null;
 }
 
-const TAHAP = ["Bayar", "Proses", "Konsol", "Lokal", "Selesai"];
+const TAHAP = ["Bayar", "Dikemas", "Tiba di Gudang Lokal", "Di Tangan Kurir", "Sudah Sampai"];
 const INDEKS: Record<string, number> = {
   MENUNGGU_PEMBAYARAN: 0,
   DIPROSES_ADMIN: 1,

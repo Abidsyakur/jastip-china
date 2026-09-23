@@ -67,6 +67,7 @@ export async function GET(req: NextRequest, { params }: Konteks) {
   } catch (err) {
     const res = tanganiErrorAuth(err);
     if (res) return res;
-    throw err;
+    console.error("Invoice error:", err);
+    return NextResponse.json({ error: "Gagal membuat invoice" }, { status: 500 });
   }
 }

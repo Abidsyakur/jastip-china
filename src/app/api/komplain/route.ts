@@ -31,7 +31,15 @@ export async function GET(req: NextRequest) {
 
     const items = await prisma.komplain.findMany({
       where: { pesananItem: { pesanan: { customerId: user.sub } } },
-      include: { pesananItem: true },
+      include: { 
+        pesananItem: { 
+          include: { 
+            pesanan: { 
+              select: { noInvoice: true } 
+            } 
+          } 
+        } 
+      },
       orderBy: { id: "desc" },
     });
 
