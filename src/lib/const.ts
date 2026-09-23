@@ -1,0 +1,1 @@
+export const NOMOR_WA_ADMIN = "6287898388993";

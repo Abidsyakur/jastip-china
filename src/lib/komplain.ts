@@ -2,7 +2,7 @@
 import { Prisma, StatusKomplain } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
-import { buatNotifikasi, kirimNotifikasiWa } from "@/lib/notifikasi";
+import { buatNotifikasi, kirimNotifikasiWa, beritahuAdmin } from "@/lib/notifikasi";
 import { AppError } from "@/lib/http-error";
 import type { AjukanKomplainInput, TindakLanjutKomplainInput } from "@/lib/validasi";
 
@@ -35,6 +35,9 @@ export async function ajukanKomplain(customerId: string, input: AjukanKomplainIn
       buktiFoto: input.buktiFoto,
       deskripsi: input.deskripsi,
     },
+  }).then(async (k) => {
+    await beritahuAdmin(`Komplain baru masuk atas item pesanan (ID: ${k.pesananItemId}). Alasan: ${k.alasan}`);
+    return k;
   });
 }
 

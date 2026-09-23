@@ -5,7 +5,7 @@ import { kurangiStokAtomik, kembalikanStok } from "@/lib/stok";
 import { buatNoInvoice } from "@/lib/no-invoice";
 import { AppError } from "@/lib/http-error";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
-import { buatNotifikasi, kirimNotifikasiWa } from "@/lib/notifikasi";
+import { buatNotifikasi, kirimNotifikasiWa, beritahuAdmin } from "@/lib/notifikasi";
 import { hitungBiayaJasaTitip, hitungOngkirDomestik } from "@/lib/tarif";
 import type { CheckoutInput, UpdateBiayaInput, UpdateStatusPesananInput, UpdatePengirimanInput } from "@/lib/validasi";
 
@@ -147,6 +147,8 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
         // Item yang barusan jadi pesanan dihapus dari keranjang — checkout
         // cuma untuk item yang dipilih (bisa sebagian), sisanya tetap di keranjang.
         await tx.keranjangItem.deleteMany({ where: { id: { in: keranjangItemIds } } });
+
+        await beritahuAdmin(`Pesanan baru masuk: ${pesanan.noInvoice} - Total: ${pesanan.totalAkhir}`);
 
         return { pesanan, pembayaran };
       });

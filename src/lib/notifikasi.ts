@@ -1,5 +1,6 @@
 // letak: src/lib/notifikasi.ts
 import type { Prisma } from "@prisma/client";
+import { NOMOR_WA_ADMIN } from "@/lib/const";
 
 const FONNTE_API_URL = "https://api.fonnte.com/send";
 
@@ -54,4 +55,8 @@ export async function kirimNotifikasiWa(noWaTujuan: string, pesan: string): Prom
   } catch (err) {
     console.error("[notifikasi] Gagal memanggil Fonnte:", err);
   }
+}
+
+export async function beritahuAdmin(pesan: string): Promise<void> {
+  await kirimNotifikasiWa(NOMOR_WA_ADMIN, pesan);
 }
