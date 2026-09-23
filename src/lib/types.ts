@@ -70,6 +70,7 @@ export interface Pesanan {
   noInvoice: string;
   statusPesanan: string;
   tglPesan: string;
+  preferensiKurir: string;
   subtotalProduk: number | string;
   biayaJasaTitip: number | string;
   ongkirChinaGudang: number | string;
