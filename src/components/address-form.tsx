@@ -59,7 +59,7 @@ export function AddressForm({
         <Input {...register("penerima")} placeholder="Budi Santoso" />
       </Field>
       <Field label="No. Telp" error={errors.noTelp?.message}>
-        <Input {...register("noTelp")} placeholder="081234567890" />
+        <Input {...register("noTelp")} placeholder="081234567890" inputMode="tel" />
       </Field>
       <Field label="Alamat Lengkap" error={errors.alamatLengkap?.message}>
         <Textarea {...register("alamatLengkap")} placeholder="Jl. Merdeka No. 123, RT 01 RW 02" />

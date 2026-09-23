@@ -165,7 +165,7 @@ export default function AdminPengaturanPage() {
                 <Input value={bank} onChange={(e) => setBank(e.target.value)} placeholder="BCA" />
               </Field>
               <Field label="No. Rekening">
-                <Input value={noRekening} onChange={(e) => setNoRekening(e.target.value)} placeholder="1234567890" />
+                <Input value={noRekening} onChange={(e) => setNoRekening(e.target.value)} placeholder="1234567890" inputMode="numeric" />
               </Field>
               <Field label="Atas Nama">
                 <Input value={atasNama} onChange={(e) => setAtasNama(e.target.value)} />

@@ -228,7 +228,7 @@ export default function AdminProdukFormPage() {
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="Berat (gram)">
-              <Input value={berat} onChange={(e) => setBerat(e.target.value)} inputMode="numeric" placeholder="800" />
+              <Input value={berat} onChange={(e) => setBerat(e.target.value)} inputMode="decimal" placeholder="800" />
             </Field>
             <Field label="Stok">
               <Input value={stok} onChange={(e) => setStok(e.target.value)} inputMode="numeric" />
