@@ -153,25 +153,35 @@ export default function DetailProdukPage() {
               <div className="mt-4">
                 <p className="mb-2 text-sm font-semibold">Varian</p>
                 <div className="flex flex-col gap-2">
-                  {p.varian.map((v) => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => {
-                        setVarianId(v.id);
-                        setQty(1);
-                      }}
-                      className={`flex items-center justify-between rounded-lg border px-4 py-2 text-left text-sm ${
-                        varianId === v.id ? "border-brand bg-brand/5 font-medium" : "border-garis"
-                      }`}
-                    >
-                      <span>
-                        {v.namaVarian}
-                        {Number(v.hargaTambahan) > 0 && ` (+${rupiah(v.hargaTambahan)})`}
-                      </span>
-                      <span className="text-xs text-ink-muda">stok {v.stok}</span>
-                    </button>
-                  ))}
+                  {p.varian.map((v) => {
+                    const varianHabis = v.stok <= 0;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        disabled={varianHabis}
+                        onClick={() => {
+                          setVarianId(v.id);
+                          setQty(1);
+                        }}
+                        className={`flex items-center justify-between rounded-lg border px-4 py-2 text-left text-sm ${
+                          varianId === v.id
+                            ? "border-brand bg-brand/5 font-medium"
+                            : varianHabis
+                            ? "cursor-not-allowed border-garis bg-gray-50 text-gray-400 opacity-60 line-through"
+                            : "border-garis"
+                        }`}
+                      >
+                        <span>
+                          {v.namaVarian}
+                          {Number(v.hargaTambahan) > 0 && ` (+${rupiah(v.hargaTambahan)})`}
+                        </span>
+                        <span className="text-xs text-ink-muda">
+                          {varianHabis ? "habis" : `stok ${v.stok}`}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
