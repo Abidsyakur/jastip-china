@@ -16,10 +16,10 @@ import { useRequireCustomer } from "@/components/auth-guard";
 interface KomplainDetail {
   id: string;
   alasan: string;
-  deskripsi: string;
+  deskripsi: string | null;
   status: string;
   solusi: string | null;
-  catatanSolusi: string | null;
+  buktiFoto: string;
   tglKomplain: string;
   tglDiselesaikan: string | null;
   pesananItem: {
@@ -27,7 +27,6 @@ interface KomplainDetail {
     varianSnapshot: string | null;
     pesanan: { noInvoice: string };
   };
-  gambar: { urlGambar: string }[];
 }
 
 const LABEL_ALASAN: Record<string, string> = {
@@ -111,32 +110,22 @@ export default function DetailKomplainPage() {
 
           <div className="mt-2 text-sm">
             <p className="font-semibold">Deskripsi:</p>
-            <p className="text-ink-muda">{komplain.deskripsi}</p>
+            <p className="text-ink-muda">{komplain.deskripsi || "-"}</p>
           </div>
 
-          {komplain.gambar.length > 0 && (
-            <div className="mt-3">
-              <p className="mb-2 text-sm font-semibold">Foto Bukti:</p>
-              <div className="flex gap-2">
-                {komplain.gambar.map((g, idx) => (
-                  <img
-                    key={idx}
-                    src={g.urlGambar}
-                    alt={`Bukti ${idx + 1}`}
-                    className="h-32 w-32 rounded-lg border border-garis object-cover"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="mt-3">
+            <p className="mb-2 text-sm font-semibold">Foto Bukti:</p>
+            <img
+              src={komplain.buktiFoto}
+              alt="Bukti komplain"
+              className="h-48 w-48 rounded-lg border border-garis object-cover"
+            />
+          </div>
 
           {komplain.solusi && (
             <div className="mt-4 border-t border-garis pt-4 text-sm">
               <p className="font-semibold">Solusi:</p>
               <p className="text-ink-muda">{LABEL_SOLUSI[komplain.solusi] ?? komplain.solusi}</p>
-              {komplain.catatanSolusi && (
-                <p className="mt-1 text-ink-muda">Catatan: {komplain.catatanSolusi}</p>
-              )}
             </div>
           )}
 

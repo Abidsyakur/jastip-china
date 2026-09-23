@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, { params }: Konteks) {
     const komplain = await prisma.komplain.findUnique({
       where: { id },
       include: {
-        pesananItem: { include: { pesanan: true } },
+        pesananItem: { include: { pesanan: { select: { customerId: true, noInvoice: true } } } },
         log: { orderBy: { waktu: "asc" } },
       },
     });
