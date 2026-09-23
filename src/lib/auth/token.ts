@@ -18,7 +18,7 @@ function getAccessSecret(): Uint8Array {
 }
 
 function getExpiresIn(): string {
-  return process.env.JWT_ACCESS_EXPIRES_IN ?? "15m";
+  return process.env.JWT_ACCESS_EXPIRES_IN ?? "2h";
 }
 
 export async function buatAccessToken(
