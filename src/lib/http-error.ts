@@ -42,10 +42,14 @@ export class AppError extends Error {
   }
 }
 
-/** Sama seperti tanganiErrorAuth, tapi untuk AppError (dan semua turunannya). */
 export function tanganiAppError(err: unknown): NextResponse | null {
   if (err instanceof AppError) {
     return NextResponse.json({ error: err.message }, { status: err.status });
   }
   return null;
+}
+
+/** Sama seperti tanganiErrorAuth, tapi untuk AppError (dan semua turunannya). */
+export function catatLogError(err: unknown) {
+  console.error("[SERVER_ERROR]", err);
 }

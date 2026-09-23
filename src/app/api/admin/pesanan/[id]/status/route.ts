@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseBody, updateStatusPesananSchema } from "@/lib/validasi";
 import { wajibAdmin } from "@/lib/auth";
-import { tanganiErrorAuth, tanganiAppError } from "@/lib/http-error";
+import { tanganiErrorAuth, tanganiAppError, catatLogError } from "@/lib/http-error";
 import { updateStatusPesanan } from "@/lib/pesanan";
 
 interface Konteks {
@@ -25,6 +25,7 @@ export async function PATCH(req: NextRequest, { params }: Konteks) {
     if (res) return res;
     const resApp = tanganiAppError(err);
     if (resApp) return resApp;
+    catatLogError(err);
     throw err;
   }
 }
