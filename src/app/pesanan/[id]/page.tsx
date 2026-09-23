@@ -72,6 +72,17 @@ export default function DetailPesananPage() {
     }
   };
 
+  const konfirmasiTerima = async () => {
+    if (!confirm("Yakin barang sudah diterima? Pesanan akan ditutup.")) return;
+    try {
+      await api(`/api/pesanan/${id}/konfirmasi-terima`, { method: "POST" });
+      toast("Pesanan selesai, terima kasih!", "sukses");
+      await ambil();
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Gagal", "error");
+    }
+  };
+
   const unduhInvoice = async () => {
     setUnduh(true);
     try {
@@ -177,6 +188,9 @@ export default function DetailPesananPage() {
               <Link href={`/pesanan/${id}/pembayaran`}><Button>Upload Bukti Pembayaran</Button></Link>
               <Button varian="danger" onClick={batalkan}>Batalkan Pesanan</Button>
             </>
+          )}
+          {p.statusPesanan === "TIBA_KIRIM_LOKAL" && (
+            <Button onClick={konfirmasiTerima}>Konfirmasi Sudah Terima</Button>
           )}
           {p.statusPesanan === "SELESAI" && (
             <Link href={`/komplain?pesananId=${id}`}><Button varian="secondary">Ajukan Komplain</Button></Link>
