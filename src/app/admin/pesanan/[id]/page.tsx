@@ -200,7 +200,7 @@ export default function AdminDetailPesananPage() {
             <div className="flex justify-between"><span>Ongkir China</span><span>{rupiah(p.ongkirChinaGudang)}</span></div>
             <div className="flex justify-between font-semibold"><span>Total</span><span>{rupiah(p.totalAkhir)}</span></div>
           </div>
-          <p className="mt-2 text-sm font-medium">Kurir Pilihan: {labelKurir(p.pengiriman?.kurir)}</p>
+          <p className="mt-2 text-sm font-medium">Kurir Pilihan: {labelKurir(p.preferensiKurir)}</p>
           <div className="mt-3">
             <Field label="Ongkir China Gudang (Rp)">
               <Input value={ongkirChina} onChange={(e) => setOngkirChina(e.target.value)} inputMode="numeric" placeholder="150000" />

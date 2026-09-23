@@ -58,7 +58,7 @@ export function SiteFooter() {
   return (
     <>
       <a
-        href="https://wa.me/6281234567890"
+        href="https://wa.me/6287898388993"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105 md:bottom-6"
