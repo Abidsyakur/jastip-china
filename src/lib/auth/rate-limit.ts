@@ -32,3 +32,25 @@ export async function cekRateLimitLogin(identifier: string): Promise<HasilRateLi
   const { success, remaining, reset } = await getLimiter().limit(identifier);
   return { diizinkan: success, sisaPercobaan: remaining, resetPada: new Date(reset) };
 }
+
+const limiterRegister = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, "1 h"), // 3 akun / 1 jam
+  prefix: "ratelimit:register",
+});
+
+const limiterUpload = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(50, "24 h"), // 50 upload / 24 jam
+  prefix: "ratelimit:upload",
+});
+
+export async function cekRateLimitRegister(identifier: string) {
+  const { success } = await limiterRegister.limit(identifier);
+  return { diizinkan: success };
+}
+
+export async function cekRateLimitUpload(identifier: string) {
+  const { success } = await limiterUpload.limit(identifier);
+  return { diizinkan: success };
+}

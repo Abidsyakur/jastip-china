@@ -14,6 +14,7 @@ import { SkeletonBar } from "@/components/ui/feedback";
 import { StatusPipeline } from "@/components/status-pipeline";
 import { toast } from "@/components/ui/toaster";
 import { useRequireAdmin } from "@/components/auth-guard";
+import { labelKurir } from "@/lib/kurir";
 import type { AdminPesanan } from "@/lib/types-admin";
 
 const TAHAP = ["Bayar", "Dikemas", "Tiba di Gudang Lokal", "Di Tangan Kurir", "Sudah Sampai"];

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { parseBody, forgotPasswordSchema } from "@/lib/validasi";
-import { normalisasiNoWa, buatResetTokenCustomer, cekRateLimitLogin } from "@/lib/auth";
+import { normalisasiNoWa, buatResetTokenCustomer } from "@/lib/auth";
+import { cekRateLimitLogin } from "@/lib/auth/rate-limit";
 import { kirimNotifikasiWa } from "@/lib/notifikasi";
 
 export async function POST(req: NextRequest) {

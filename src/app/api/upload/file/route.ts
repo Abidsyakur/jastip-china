@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { parseBody, requestUploadSchema } from "@/lib/validasi";
 import { wajibLogin } from "@/lib/auth";
+import { cekRateLimitUpload } from "@/lib/auth/rate-limit";
 import { tanganiErrorAuth } from "@/lib/http-error";
 import { unggahBufferKeR2 } from "@/lib/r2";
 
@@ -19,6 +20,14 @@ const MAKS_UKURAN_BYTES = 5 * 1024 * 1024; // 5MB — sama seperti presigned flo
 export async function POST(req: NextRequest) {
   try {
     const user = await wajibLogin(req);
+
+    const limit = await cekRateLimitUpload(`${user.tipe}:${user.sub}`);
+    if (!limit.diizinkan) {
+      return NextResponse.json(
+        { error: "Batas upload harian tercapai, coba lagi besok." },
+        { status: 429 }
+      );
+    }
 
     const form = await req.formData();
     const file = form.get("file");

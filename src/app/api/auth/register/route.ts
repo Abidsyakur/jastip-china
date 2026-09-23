@@ -2,8 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { parseBody, registerSchema } from "@/lib/validasi";
 import { hashPassword, normalisasiNoWa } from "@/lib/auth";
+import { cekRateLimitRegister } from "@/lib/auth/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const limit = await cekRateLimitRegister(`register:${ip}`);
+  if (!limit.diizinkan) {
+    return NextResponse.json(
+      { error: "Terlalu banyak percobaan registrasi dari IP ini, coba lagi nanti." },
+      { status: 429 }
+    );
+  }
+
   const parsed = await parseBody(req, registerSchema);
   if ("error" in parsed) return parsed.error;
 

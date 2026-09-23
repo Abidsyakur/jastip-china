@@ -8,8 +8,9 @@ import {
   buatSesiCustomer,
   setAccessTokenCookie,
   setRefreshTokenCookie,
-  cekRateLimitLogin,
 } from "@/lib/auth";
+import { cekRateLimitLogin } from "@/lib/auth/rate-limit";
+
 
 const AKSES_TOKEN_UMUR_DETIK = 15 * 60;
 
