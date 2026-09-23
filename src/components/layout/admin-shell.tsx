@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -20,6 +21,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [bukaMenu, setBukaMenu] = useState(false);
 
   const keluar = async () => {
     await logout();
@@ -54,24 +56,44 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
       </aside>
-      <div className="pb-20 md:ml-60 md:pb-0">
-        <div className="border-b border-garis bg-white px-4 py-3 md:hidden">
-          <p className="font-display font-bold text-brand">Jastip China Admin</p>
+
+      <div className="pb-12 md:ml-60 md:pb-0">
+        <div className="flex items-center justify-between border-b border-garis bg-white px-4 py-3 md:hidden">
+          <img src="/logo-nihao.png" alt="Nihao" className="h-8 w-auto" />
+          <button
+            onClick={() => setBukaMenu(!bukaMenu)}
+            className="rounded-lg border border-garis px-3 py-1.5 text-sm font-medium"
+          >
+            {bukaMenu ? "Tutup" : "Menu ☰"}
+          </button>
         </div>
+
+        {bukaMenu && (
+          <div className="border-b border-garis bg-white px-4 py-3 md:hidden">
+            <nav className="flex flex-col gap-2">
+              {MENU.map((m) => (
+                <Link
+                  key={m.href}
+                  href={m.href}
+                  onClick={() => setBukaMenu(false)}
+                  className={`rounded-lg px-3 py-2 text-sm ${
+                    pathname?.startsWith(m.href) ? "bg-brand/10 font-semibold text-brand" : "text-ink"
+                  }`}
+                >
+                  {m.label}
+                </Link>
+              ))}
+              <button
+                onClick={keluar}
+                className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-left text-sm font-medium text-red-600"
+              >
+                Keluar
+              </button>
+            </nav>
+          </div>
+        )}
+
         <main className="mx-auto max-w-5xl p-4 md:p-6">{children}</main>
-        <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-garis bg-white md:hidden">
-          {MENU.slice(0, 5).map((m) => (
-            <Link
-              key={m.href}
-              href={m.href}
-              className={`flex flex-col items-center py-2 text-[11px] ${
-                pathname?.startsWith(m.href) ? "font-semibold text-brand" : "text-ink-muda"
-              }`}
-            >
-              {m.label.split(" ")[0]}
-            </Link>
-          ))}
-        </nav>
       </div>
     </div>
   );
