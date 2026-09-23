@@ -1,13 +1,9 @@
 // letak: src/lib/invoice.ts
-import PDFDocument from "pdfkit";
+import { jsPDF } from "jspdf";
 
 /**
- * Builder PDF invoice — fungsi MURNI atas data plain (tidak menyentuh prisma
- * sama sekali), supaya bisa di-unit-test tanpa DB: cukup kasih objek
- * InvoiceData palsu lalu assert hasilnya Buffer PDF valid.
- *
- * Route handler (/api/pesanan/[id]/invoice) yang bertugas: cek ownership,
- * ambil data dari DB, konversi Decimal -> number, lalu panggil fungsi ini.
+ * Builder PDF invoice dengan jsPDF (pure JS, serverless-compatible).
+ * Fungsi MURNI atas data plain (tidak menyentuh prisma sama sekali).
  */
 
 export interface InvoiceItemData {
@@ -54,67 +50,94 @@ function tanggal(id: Date | string): string {
   }).format(d);
 }
 
-export function bangunInvoicePdf(data: InvoiceData): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 50 });
-    const potongan: Buffer[] = [];
+export function bangunInvoicePdf(data: InvoiceData): Buffer {
+  const doc = new jsPDF();
+  let y = 20;
 
-    doc.on("data", (c: Buffer) => potongan.push(c));
-    doc.on("end", () => resolve(Buffer.concat(potongan)));
-    doc.on("error", reject);
+  // Header
+  doc.setFontSize(20);
+  doc.text("Jastip China", 20, y);
+  y += 10;
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text("Invoice pesanan jastip barang China", 20, y);
+  y += 10;
 
-    // Gunakan font default PDFKit (built-in, tanpa external dependency)
-    // PDFKit sudah include Helvetica built-in, tapi di serverless Vercel
-    // tidak bisa load external fonts. Gunakan API default saja.
-    doc.fontSize(20).text("Jastip China");
-    doc.fontSize(10).fillColor("#666666").text("Invoice pesanan jastip barang China");
-    doc.moveDown();
-    doc.fillColor("#000000").fontSize(12);
-    doc.text(`No. Invoice: ${data.noInvoice}`);
-    doc.fontSize(10).text(`Tanggal pesan: ${tanggal(data.tglPesan)}`);
-    doc.moveDown();
+  // Info invoice
+  doc.setTextColor(0);
+  doc.setFontSize(12);
+  doc.text(`No. Invoice: ${data.noInvoice}`, 20, y);
+  y += 7;
+  doc.setFontSize(10);
+  doc.text(`Tanggal pesan: ${tanggal(data.tglPesan)}`, 20, y);
+  y += 10;
 
-    doc.fontSize(11).text("Ditagihkan ke:");
-    doc.fontSize(10).text(data.customerNama);
-    doc.text(data.customerKontak);
-    doc.text(data.alamatLengkap, { width: 500 });
-    doc.moveDown();
+  // Customer
+  doc.setFontSize(11);
+  doc.text("Ditagihkan ke:", 20, y);
+  y += 5;
+  doc.setFontSize(10);
+  doc.text(data.customerNama, 20, y);
+  y += 5;
+  doc.text(data.customerKontak, 20, y);
+  y += 5;
+  const alamatLines = doc.splitTextToSize(data.alamatLengkap, 170);
+  doc.text(alamatLines, 20, y);
+  y += alamatLines.length * 5 + 5;
 
-    // Item — baris teks sederhana
-    doc.fontSize(11).text("Item pesanan:");
-    doc.fontSize(10);
-    for (const item of data.items) {
-      const nama = item.varian ? `${item.nama} (${item.varian})` : item.nama;
-      doc.text(`${nama} — ${item.jumlah} x ${rupiah(item.hargaSatuan)} = ${rupiah(item.hargaSatuan * item.jumlah)}`, {
-        width: 500,
-      });
+  // Items
+  doc.setFontSize(11);
+  doc.text("Item pesanan:", 20, y);
+  y += 5;
+  doc.setFontSize(10);
+  for (const item of data.items) {
+    const nama = item.varian ? `${item.nama} (${item.varian})` : item.nama;
+    const line = `${nama} - ${item.jumlah} x ${rupiah(item.hargaSatuan)} = ${rupiah(item.hargaSatuan * item.jumlah)}`;
+    const lines = doc.splitTextToSize(line, 170);
+    doc.text(lines, 20, y);
+    y += lines.length * 5;
+  }
+  y += 5;
+
+  // Biaya
+  doc.setFontSize(11);
+  doc.text("Rincian biaya:", 20, y);
+  y += 5;
+  doc.setFontSize(10);
+  doc.text(`Subtotal produk: ${rupiah(data.subtotalProduk)}`, 20, y);
+  y += 5;
+  doc.text(`Biaya jasa titip: ${rupiah(data.biayaJasaTitip)}`, 20, y);
+  y += 5;
+  doc.text(`Ongkir China ke gudang: ${rupiah(data.ongkirChinaGudang)}`, 20, y);
+  y += 5;
+  doc.text(`Ongkir domestik: ${rupiah(data.ongkirDomestik)}`, 20, y);
+  y += 5;
+  if (data.biayaAdminPayment > 0) {
+    doc.text(`Biaya admin pembayaran: ${rupiah(data.biayaAdminPayment)}`, 20, y);
+    y += 5;
+  }
+  y += 3;
+  doc.setFontSize(13);
+  doc.text(`Total: ${rupiah(data.totalAkhir)}`, 20, y);
+  y += 10;
+
+  // Rekening
+  if (data.rekening.length > 0) {
+    doc.setFontSize(11);
+    doc.text("Transfer ke:", 20, y);
+    y += 5;
+    doc.setFontSize(10);
+    for (const r of data.rekening) {
+      doc.text(`${r.bank} - ${r.noRekening} a.n. ${r.atasNama}`, 20, y);
+      y += 5;
     }
-    doc.moveDown();
+    y += 5;
+  }
 
-    // Rincian biaya
-    doc.fontSize(11).text("Rincian biaya:");
-    doc.fontSize(10);
-    doc.text(`Subtotal produk: ${rupiah(data.subtotalProduk)}`);
-    doc.text(`Biaya jasa titip: ${rupiah(data.biayaJasaTitip)}`);
-    doc.text(`Ongkir China ke gudang: ${rupiah(data.ongkirChinaGudang)}`);
-    doc.text(`Ongkir domestik: ${rupiah(data.ongkirDomestik)}`);
-    if (data.biayaAdminPayment > 0) {
-      doc.text(`Biaya admin pembayaran: ${rupiah(data.biayaAdminPayment)}`);
-    }
-    doc.moveDown();
-    doc.fontSize(13).text(`Total: ${rupiah(data.totalAkhir)}`);
-    doc.moveDown();
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text("Simpan invoice ini sebagai bukti pesananmu.", 20, y);
 
-    if (data.rekening.length > 0) {
-      doc.fontSize(11).text("Transfer ke:");
-      doc.fontSize(10);
-      for (const r of data.rekening) {
-        doc.text(`${r.bank} — ${r.noRekening} a.n. ${r.atasNama}`);
-      }
-      doc.moveDown();
-    }
-
-    doc.fontSize(9).fillColor("#666666").text("Simpan invoice ini sebagai bukti pesananmu.");
-    doc.end();
-  });
+  const arrayBuffer = doc.output("arraybuffer");
+  return Buffer.from(arrayBuffer);
 }
