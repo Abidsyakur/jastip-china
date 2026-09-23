@@ -37,3 +37,21 @@ export const paginationSchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20),
 });
 export type PaginationQuery = z.infer<typeof paginationSchema>;
+
+/**
+ * URL file hasil upload internal (/api/file/...) ATAU URL absolut http(s).
+ * z.string().url() bawaan Zod MENOLAK path relatif, padahal unggahGambar()
+ * mengembalikan publicUrl same-origin (/api/file/...) — inilah penyebab
+ * "Validasi gagal — gambarUrls: Invalid url" saat tambah produk.
+ * Dipakai untuk: gambarUrls produk, buktiUrl pembayaran, buktiFoto komplain,
+ * fotoReferensiUrl PO. Link eksternal (linkSumber, linkProdukReferensi) tetap
+ * pakai z.string().url() karena memang harus absolut.
+ */
+export const fileUrlSchema = (pesan = "URL file tidak valid") =>
+  z
+    .string()
+    .trim()
+    .min(1, pesan)
+    .refine((v) => v.startsWith("/api/file/") || /^https?:\/\/\S+/.test(v), {
+      message: pesan,
+    });

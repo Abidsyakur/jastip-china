@@ -1,13 +1,13 @@
 // letak: src/lib/validasi/komplain.ts
 import { z } from "zod";
 import { AlasanKomplain, SolusiKomplain, StatusKomplain } from "@prisma/client";
-import { cuidSchema, paginationSchema } from "./common";
+import { cuidSchema, paginationSchema, fileUrlSchema } from "./common";
 
 // POST /api/komplain — customer ajukan komplain atas satu item pesanan
 export const ajukanKomplainSchema = z.object({
   pesananItemId: cuidSchema,
   alasan: z.nativeEnum(AlasanKomplain),
-  buktiFoto: z.string().url("Bukti foto wajib diunggah"), // wajib sesuai spesifikasi
+  buktiFoto: fileUrlSchema("Bukti foto wajib diunggah"), // wajib sesuai spesifikasi
   deskripsi: z.string().trim().max(1000).optional(),
 });
 export type AjukanKomplainInput = z.infer<typeof ajukanKomplainSchema>;

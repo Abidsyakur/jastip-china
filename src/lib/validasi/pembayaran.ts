@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { StatusPembayaran } from "@prisma/client";
 import { paginationSchema } from "./common";
+import { fileUrlSchema } from "./common";
 
 // POST /api/pesanan/[id]/pembayaran — bikin percobaan bayar baru (termasuk retry
 // setelah kadaluarsa/ditolak — Pembayaran satu-ke-banyak terhadap Pesanan).
@@ -15,7 +16,7 @@ export type BuatPembayaranInput = z.infer<typeof buatPembayaranSchema>;
 
 // PATCH /api/pesanan/[id]/pembayaran/bukti — customer upload bukti transfer
 export const uploadBuktiSchema = z.object({
-  buktiUrl: z.string().url("URL bukti transfer tidak valid"),
+  buktiUrl: fileUrlSchema("URL bukti transfer tidak valid"),
   tglBayar: z.coerce.date(),
 });
 export type UploadBuktiInput = z.infer<typeof uploadBuktiSchema>;

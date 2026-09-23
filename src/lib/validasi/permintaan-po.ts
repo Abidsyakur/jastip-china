@@ -1,7 +1,7 @@
 // letak: src/lib/validasi/permintaan-po.ts
 import { z } from "zod";
 import { PermintaanPoStatus } from "@prisma/client";
-import { cuidSchema, paginationSchema, uangPositifSchema } from "./common";
+import { cuidSchema, paginationSchema, uangPositifSchema, fileUrlSchema } from "./common";
 
 // POST /api/permintaan-po — customer ajukan barang custom di luar katalog
 export const ajukanPoSchema = z.object({
@@ -11,7 +11,7 @@ export const ajukanPoSchema = z.object({
     .trim()
     .min(10, "Deskripsi terlalu singkat, jelaskan spesifikasi barang yang diinginkan")
     .max(2000),
-  fotoReferensiUrl: z.string().url().optional(),
+  fotoReferensiUrl: fileUrlSchema("URL foto referensi tidak valid").optional(),
   jumlahDiminta: z.coerce.number().int().positive("Jumlah minimal 1"),
 });
 export type AjukanPoInput = z.infer<typeof ajukanPoSchema>;

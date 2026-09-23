@@ -1,7 +1,7 @@
 // letak: src/lib/validasi/produk.ts
 import { z } from "zod";
 import { ProdukStatus } from "@prisma/client";
-import { cuidSchema, paginationSchema, uangPositifSchema, uangSchema } from "./common";
+import { cuidSchema, paginationSchema, uangPositifSchema, uangSchema, fileUrlSchema } from "./common";
 
 // GET /api/produk — query publik: cuma produk AKTIF, filter kategori, cari, sort, pagination
 export const produkQuerySchema = paginationSchema.extend({
@@ -43,7 +43,7 @@ export const produkCreateSchema = z.object({
   stok: z.coerce.number().int().nonnegative().default(0),
   status: z.nativeEnum(ProdukStatus).default(ProdukStatus.AKTIF),
   gambarUrls: z
-    .array(z.string().url())
+    .array(fileUrlSchema("URL foto produk tidak valid"))
     .min(1, "Minimal 1 foto produk")
     .max(10, "Maksimal 10 foto produk"),
   varian: z.array(varianInputSchema).max(50).default([]),
