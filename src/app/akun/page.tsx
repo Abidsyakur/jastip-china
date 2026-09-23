@@ -119,6 +119,7 @@ export default function AkunPage() {
           )}
           <div className="mt-3 flex gap-4 border-t border-garis pt-3 text-sm">
             <Link href="/pesanan" className="font-medium text-brand">Pesanan Saya</Link>
+            <Link href="/riwayat-komplain" className="font-medium text-brand">Riwayat Komplain</Link>
             <Link href="/bantuan" className="font-medium text-brand">Bantuan</Link>
           </div>
         </Card>
