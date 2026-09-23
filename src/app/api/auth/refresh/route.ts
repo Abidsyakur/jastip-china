@@ -11,7 +11,7 @@ import {
   buatAccessToken,
 } from "@/lib/auth";
 
-const AKSES_TOKEN_UMUR_DETIK = 15 * 60;
+const AKSES_TOKEN_UMUR_DETIK = 24 * 60 * 60;
 
 export async function POST(req: NextRequest) {
   const refreshTokenLama = req.cookies.get(COOKIE_REFRESH_TOKEN)?.value;

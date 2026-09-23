@@ -17,12 +17,26 @@ interface ApiOptions {
 }
 
 export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
-  const res = await fetch(path, {
-    method: opts.method ?? "GET",
-    headers: opts.body !== undefined ? { "Content-Type": "application/json" } : undefined,
-    credentials: "include",
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
+  const jalankan = async (): Promise<Response> =>
+    fetch(path, {
+      method: opts.method ?? "GET",
+      headers: opts.body !== undefined ? { "Content-Type": "application/json" } : undefined,
+      credentials: "include",
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    });
+
+  let res = await jalankan();
+
+  // Access token cuma 24 jam — kalau 401, coba refresh SEKALI lalu ulangi request.
+  // Ini bikin UX mulus: user tidak dilempar ke login tiap token expired.
+  if (res.status === 401 && path !== "/api/auth/refresh") {
+    try {
+      await fetch("/api/auth/refresh", { method: "POST", credentials: "include" });
+      res = await jalankan();
+    } catch {
+      // biarkan res asli yang diproses di bawah
+    }
+  }
 
   if (res.status === 204) return undefined as T;
 
