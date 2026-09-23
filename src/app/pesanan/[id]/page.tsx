@@ -76,8 +76,13 @@ export default function DetailPesananPage() {
     setUnduh(true);
     try {
       const res = await fetch(`/api/pesanan/${id}/invoice`, { credentials: "include" });
-      if (!res.ok) throw new Error("Gagal unduh invoice");
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        const msg = errText.substring(0, 100) || res.statusText;
+        throw new Error(`Gagal unduh invoice (${res.status}) — ${msg}`);
+      }
       const blob = await res.blob();
+      if (blob.size === 0) throw new Error("File kosong");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
