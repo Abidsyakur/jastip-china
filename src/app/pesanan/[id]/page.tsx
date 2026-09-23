@@ -17,7 +17,7 @@ import { useRequireCustomer } from "@/components/auth-guard";
 import { labelKurir } from "@/lib/kurir";
 import type { Pesanan } from "@/lib/types";
 
-const TAHAP = ["Bayar", "Proses", "Konsol", "Lokal", "Selesai"];
+const TAHAP = ["Bayar", "Dikemas", "Tiba di Gudang Lokal", "Di Tangan Kurir", "Sudah Sampai"];
 const STATUS_KE_INDEKS: Record<string, number> = {
   MENUNGGU_PEMBAYARAN: 0,
   DIPROSES_ADMIN: 1,

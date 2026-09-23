@@ -16,7 +16,7 @@ import { toast } from "@/components/ui/toaster";
 import { useRequireAdmin } from "@/components/auth-guard";
 import type { AdminPesanan } from "@/lib/types-admin";
 
-const TAHAP = ["Bayar", "Verif", "Proses", "Konsol", "Lokal", "Selesai"];
+const TAHAP = ["Bayar", "Dikemas", "Tiba di Gudang Lokal", "Di Tangan Kurir", "Sudah Sampai"];
 const INDEKS: Record<string, number> = {
   MENUNGGU_PEMBAYARAN: 0,
   DIPROSES_ADMIN: 1,
