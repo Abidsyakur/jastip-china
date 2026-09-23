@@ -41,7 +41,11 @@ function LoginIsi() {
 
   return (
     <Card className="w-full max-w-md p-6 md:p-8">
-      <p className="text-center font-display text-2xl font-bold text-brand">鲜货直达</p>
+      <div className="flex justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-14 w-auto" />
+      </div>
+      <p className="mt-2 text-center font-display text-2xl font-bold text-brand">鲜货直达</p>
       <h1 className="mt-1 text-center text-xl font-semibold">Masuk ke akunmu</h1>
       <form onSubmit={handleSubmit(kirim)} className="mt-6 flex flex-col gap-4">
         <Field label="Nomor WhatsApp" error={errors.noWa?.message}>

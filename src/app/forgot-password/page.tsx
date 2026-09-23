@@ -36,7 +36,11 @@ export default function ForgotPasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md p-6 md:p-8">
-        <h1 className="text-center text-xl font-semibold">Lupa Password</h1>
+        <div className="flex justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-14 w-auto" />
+        </div>
+        <h1 className="mt-2 text-center text-xl font-semibold">Lupa Password</h1>
         {terkirim ? (
           <div className="mt-6 text-center">
             <p className="font-medium">Link reset terkirim</p>

@@ -67,7 +67,11 @@ function ResetIsi() {
 
   return (
     <Card className="w-full max-w-md p-6 md:p-8">
-      <h1 className="text-center text-xl font-semibold">Password Baru</h1>
+      <div className="flex justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-14 w-auto" />
+      </div>
+      <h1 className="mt-2 text-center text-xl font-semibold">Password Baru</h1>
       <form onSubmit={handleSubmit(kirim)} className="mt-6 flex flex-col gap-4">
         <Field label="Password Baru" error={errors.passwordBaru?.message} bantu="Min 8 karakter, ada huruf dan angka">
           <Input {...register("passwordBaru")} type="password" placeholder="••••••••" />

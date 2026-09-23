@@ -38,8 +38,11 @@ export default function AdminLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-ink px-4 py-8">
       <Card className="w-full max-w-md p-6 md:p-8">
-        <p className="text-center font-display text-xl font-bold text-brand">Jastip China</p>
-        <h1 className="mt-1 text-center text-lg font-semibold">Masuk khusus admin untuk kelola toko.</h1>
+        <div className="flex justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-14 w-auto" />
+        </div>
+        <h1 className="mt-2 text-center text-lg font-semibold">Masuk khusus admin untuk kelola toko.</h1>
         <form onSubmit={handleSubmit(kirim)} className="mt-6 flex flex-col gap-4">
           <Field label="Email" error={errors.email?.message}>
             <Input {...register("email")} placeholder="admin@jastipchina.id" inputMode="email" />

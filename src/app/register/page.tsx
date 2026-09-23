@@ -55,7 +55,11 @@ export default function RegisterPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md p-6 md:p-8">
-        <p className="text-center font-display text-2xl font-bold text-brand">鲜货直达</p>
+        <div className="flex justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-14 w-auto" />
+        </div>
+        <p className="mt-2 text-center font-display text-2xl font-bold text-brand">鲜货直达</p>
         <h1 className="mt-1 text-center text-xl font-semibold">Daftar akun baru</h1>
         <form onSubmit={handleSubmit(kirim)} className="mt-6 flex flex-col gap-4">
           <Field label="Nama Lengkap" error={errors.nama?.message}>

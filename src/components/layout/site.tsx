@@ -57,10 +57,10 @@ export function SiteFooter() {
     <footer className="mt-12 border-t border-garis bg-ink text-cream">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4 md:px-6">
         <div>
-          <span className="inline-block rounded-lg bg-cream p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-12 w-auto" />
-          </span>
+          {/* Logo versi putih (filter) — file asli ber-background putih,
+              jadi di footer gelap tampil bersih tanpa kotak. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-12 w-auto brightness-0 invert" />
           <p className="mt-2 text-sm opacity-80">
             Titip barang China mudah, aman, sampai depan pintu.
           </p>
