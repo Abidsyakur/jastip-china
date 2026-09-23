@@ -55,20 +55,20 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-12 border-t border-garis bg-white text-ink">
+    <footer className="mt-12 border-t border-garis bg-ink text-cream">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4 md:px-6">
         <div>
           {/* Logo versi putih (filter) — file asli ber-background putih,
               jadi di footer gelap tampil bersih tanpa kotak. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-12 w-auto" />
-          <p className="mt-2 text-sm text-ink-muda">
+          <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-12 w-auto brightness-0 invert" />
+          <p className="mt-2 text-sm opacity-80">
             Titip barang China mudah, aman, sampai depan pintu.
           </p>
         </div>
         <div>
           <p className="mb-2 text-sm font-semibold">Jelajahi</p>
-          <div className="flex flex-col gap-1 text-sm text-ink-muda">
+          <div className="flex flex-col gap-1 text-sm opacity-80">
             <Link href="/">Beranda</Link>
             <Link href="/katalog">Katalog</Link>
             <Link href="/cara-order">Cara Order</Link>
@@ -77,7 +77,7 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="mb-2 text-sm font-semibold">Bantuan</p>
-          <div className="flex flex-col gap-1 text-sm text-ink-muda">
+          <div className="flex flex-col gap-1 text-sm opacity-80">
             <Link href="/bantuan">FAQ</Link>
             <Link href="/syarat-layanan">Syarat Layanan</Link>
             <Link href="/kebijakan-refund">Kebijakan Refund</Link>
@@ -85,8 +85,8 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="mb-2 text-sm font-semibold">Hubungi kami</p>
-          <p className="text-sm text-ink-muda">WA 0812-3456-7890</p>
-          <p className="text-sm text-ink-muda">Senin sampai Sabtu 09.00 sampai 17.00</p>
+          <p className="text-sm opacity-80">WA 0812-3456-7890</p>
+          <p className="text-sm opacity-80">Senin sampai Sabtu 09.00 sampai 17.00</p>
         </div>
       </div>
     </footer>
