@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, ShoppingCart, UserRound } from "lucide-react";
 
 const MENU = [
   { href: "/", label: "Beranda" },
@@ -35,17 +35,30 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-4">
-          <Link href="/keranjang" className="text-sm text-ink" aria-label="Keranjang">
-            Keranjang
+        <div className="flex items-center gap-2">
+          <Link
+            href="/keranjang"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-ink hover:bg-krim"
+            aria-label="Keranjang"
+          >
+            <ShoppingCart size={22} />
           </Link>
           {user ? (
-            <Link href={user.tipe === "admin" ? "/admin/dashboard" : "/akun"} className="text-sm font-medium text-ink">
-              {user.nama}
+            <Link
+              href={user.tipe === "admin" ? "/admin/dashboard" : "/akun"}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-ink hover:bg-krim"
+              aria-label={user.nama}
+              title={user.nama}
+            >
+              <UserRound size={22} />
             </Link>
           ) : (
-            <Link href="/login" className="text-sm font-medium text-brand">
-              Login
+            <Link
+              href="/login"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-brand hover:bg-krim"
+              aria-label="Login / Daftar"
+            >
+              <UserRound size={22} />
             </Link>
           )}
         </div>
