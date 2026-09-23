@@ -32,7 +32,6 @@ export default function PembayaranPage() {
   const [pesanan, setPesanan] = useState<Pesanan | null>(null);
   const [rekening, setRekening] = useState<Rekening[]>([]);
   const [bukti, setBukti] = useState<string | null>(null);
-  const [tglBayar, setTglBayar] = useState("");
   const [kirim, setKirim] = useState(false);
   const [, setDetik] = useState(0);
 
@@ -90,15 +89,11 @@ export default function PembayaranPage() {
       toast("Pilih foto bukti dulu", "error");
       return;
     }
-    if (!tglBayar) {
-      toast("Isi tanggal bayar dulu", "error");
-      return;
-    }
     setKirim(true);
     try {
       await api(`/api/pesanan/${id}/pembayaran/bukti`, {
         method: "PATCH",
-        body: { buktiUrl: bukti, tglBayar },
+        body: { buktiUrl: bukti, tglBayar: new Date().toISOString() },
       });
       toast("Bukti transfer terkirim. Tunggu verifikasi admin ya.", "sukses");
       await ambil();
@@ -198,11 +193,6 @@ export default function PembayaranPage() {
         {bisaUpload && (
           <Card className="mt-4 p-4">
             <UploadField tujuan="bukti-transfer" nilai={bukti} onBerubah={setBukti} />
-            <div className="mt-3">
-              <Field label="Tanggal Bayar">
-                <Input type="date" value={tglBayar} onChange={(e) => setTglBayar(e.target.value)} />
-              </Field>
-            </div>
             <Button penuh memuat={kirim} className="mt-3" onClick={uploadBukti}>
               Upload Bukti
             </Button>

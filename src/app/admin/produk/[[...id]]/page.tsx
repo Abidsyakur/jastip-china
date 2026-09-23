@@ -116,6 +116,27 @@ export default function AdminProdukFormPage() {
       toast("Lengkapi nama, kategori, harga RMB, berat, dan link sumber", "error");
       return;
     }
+    if (!/^https?:\/\//i.test(linkSumber.trim())) {
+      toast("Link sumber harus URL lengkap dengan http:// atau https://", "error");
+      return;
+    }
+    if (Number(berat) <= 0) {
+      toast("Berat harus lebih dari 0 gram", "error");
+      return;
+    }
+    if (Number(rmb) <= 0) {
+      toast("Harga RMB harus lebih dari 0", "error");
+      return;
+    }
+    if (Number(stok) < 0) {
+      toast("Stok tidak boleh negatif", "error");
+      return;
+    }
+    const varianValid = varian.filter((v) => v.namaVarian.trim().length > 0);
+    if (varian.length > 0 && varianValid.length !== varian.length) {
+      toast("Ada varian tanpa nama — isi nama atau hapus barisnya", "error");
+      return;
+    }
     if (gambar.length === 0) {
       toast("Minimal 1 foto produk", "error");
       return;
@@ -123,10 +144,10 @@ export default function AdminProdukFormPage() {
     setKirim(true);
     try {
       const body: Record<string, unknown> = {
-        namaProduk: nama,
+        namaProduk: nama.trim(),
         kategoriId,
-        linkSumber,
-        deskripsi: deskripsi || undefined,
+        linkSumber: linkSumber.trim(),
+        deskripsi: deskripsi.trim() || undefined,
         hargaAsalRmb: Number(rmb),
         ...(kurs ? { kurs: Number(kurs) } : {}),
         ...(hargaOverride ? { hargaJualIdr: Number(hargaOverride) } : {}),
@@ -134,7 +155,11 @@ export default function AdminProdukFormPage() {
         stok: Number(stok),
         status,
         gambarUrls: gambar,
-        varian: varian.map((v) => ({ namaVarian: v.namaVarian, stok: v.stok, hargaTambahan: v.hargaTambahan })),
+        varian: varianValid.map((v) => ({
+          namaVarian: v.namaVarian.trim(),
+          stok: v.stok,
+          hargaTambahan: v.hargaTambahan,
+        })),
       };
       if (modeBaru) {
         await api("/api/admin/produk", { method: "POST", body });

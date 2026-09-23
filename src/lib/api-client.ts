@@ -19,7 +19,7 @@ interface ApiOptions {
 export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
   const res = await fetch(path, {
     method: opts.method ?? "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: opts.body !== undefined ? { "Content-Type": "application/json" } : undefined,
     credentials: "include",
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
@@ -30,10 +30,24 @@ export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
   const data: unknown = ct.includes("application/json") ? await res.json() : await res.text();
 
   if (!res.ok) {
-    const pesan =
-      typeof data === "object" && data !== null && "error" in data && typeof data.error === "string"
-        ? data.error
-        : `Gagal memuat (${res.status})`;
+    let pesan = `Gagal memuat (${res.status})`;
+    if (typeof data === "object" && data !== null && "error" in data && typeof data.error === "string") {
+      pesan = data.error;
+      // Validasi Zod: { error: "Validasi gagal", detail: [{field, pesan}] }
+      // Susun jadi satu baris yang bisa dibaca manusia, supaya user tahu
+      // FIELD mana yang salah — bukan cuma "Validasi gagal" generik.
+      if (
+        data.error === "Validasi gagal" &&
+        Array.isArray((data as { detail?: unknown }).detail)
+      ) {
+        const rincian = (
+          (data as unknown as { detail: { field: string; pesan: string }[] }).detail ?? []
+        )
+          .map((d) => `${d.field}: ${d.pesan}`)
+          .join("; ");
+        if (rincian) pesan = `Validasi gagal — ${rincian}`;
+      }
+    }
     throw new ApiError(pesan, res.status);
   }
 
