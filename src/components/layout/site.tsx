@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -82,7 +82,7 @@ export function SiteFooter() {
       <footer className="mt-12 border-t border-garis bg-ink text-cream">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4 md:px-6">
         <div>
-          {/* Logo versi putih (filter) — file asli ber-background putih,
+          {/* Logo versi putih (filter) â€” file asli ber-background putih,
               jadi di footer gelap tampil bersih tanpa kotak. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-12 w-auto brightness-0 invert" />
@@ -109,7 +109,7 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="mb-2 text-sm font-semibold">Hubungi kami</p>
-          <p className="text-sm opacity-80">WA 0812-3456-7890</p>
+          <p className="text-sm opacity-80">WA 0878-9838-8993</p>
           <p className="text-sm opacity-80">Senin sampai Sabtu 09.00 sampai 17.00</p>
         </div>
       </div>

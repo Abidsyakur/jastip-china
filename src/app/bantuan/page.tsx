@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -56,7 +56,7 @@ export default function BantuanPage() {
 
         <Card className="mb-4 border-l-4 border-l-jade p-4 text-sm">
           <p className="font-semibold">Butuh bantuan lain?</p>
-          <p className="text-ink-muda">Chat admin via WhatsApp di 0812-3456-7890 (Senin-Sabtu 09.00-17.00).</p>
+          <p className="text-ink-muda">Chat admin via WhatsApp di 0878-9838-8993 (Senin-Sabtu 09.00-17.00).</p>
           <div className="mt-2">
             <Link href="/komplain"><Button ukuran="sm" varian="secondary">Ajukan Komplain</Button></Link>
           </div>

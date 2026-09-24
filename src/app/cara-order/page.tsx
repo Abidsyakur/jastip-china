@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { SiteHeader, SiteFooter } from "@/components/layout/site";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Card } from "@/components/ui/card";
@@ -37,7 +37,7 @@ export default function CaraOrderPage() {
           ))}
         </div>
         <Card className="mt-4 border-l-4 border-l-jade p-4 text-sm">
-          Masih bingung? Chat admin via WhatsApp di 0812-3456-7890.
+          Masih bingung? Chat admin via WhatsApp di 0878-9838-8993.
         </Card>
       </main>
       <SiteFooter />

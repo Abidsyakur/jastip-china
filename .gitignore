@@ -26,3 +26,5 @@ next-env.d.ts
 /prisma/dev.db
 
 docs/.obsidian/
+.vercel
+.env*

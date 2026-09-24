@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
@@ -45,7 +45,7 @@ function LoginIsi() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-nihao.png" alt="Nihao Jastip" className="h-14 w-auto" />
       </div>
-      <p className="mt-2 text-center font-display text-2xl font-bold text-brand">鲜货直达</p>
+      <p className="mt-2 text-center font-display text-2xl font-bold text-brand">é²œè´§ç›´è¾¾</p>
       <h1 className="mt-1 text-center text-xl font-semibold">Masuk ke akunmu</h1>
       <form onSubmit={handleSubmit(kirim)} className="mt-6 flex flex-col gap-4">
         <Field label="Nomor WhatsApp" error={errors.noWa?.message}>
@@ -53,7 +53,7 @@ function LoginIsi() {
         </Field>
         <div>
           <Field label="Password" error={errors.password?.message}>
-            <Input {...register("password")} type="password" placeholder="••••••••" />
+            <Input {...register("password")} type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
           </Field>
           <div className="mt-1 text-right">
             <Link href="/forgot-password" className="text-sm text-brand">
@@ -72,7 +72,7 @@ function LoginIsi() {
       </p>
       <div className="my-4 h-px bg-garis" />
       <p className="text-center text-xs text-ink-muda">
-        Butuh bantuan? Chat admin via WhatsApp di 0812-3456-7890.
+        Butuh bantuan? Chat admin via WhatsApp di 0878-9838-8993.
       </p>
     </Card>
   );

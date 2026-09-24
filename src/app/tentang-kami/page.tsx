@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { SiteHeader, SiteFooter } from "@/components/layout/site";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Card } from "@/components/ui/card";
@@ -27,7 +27,7 @@ export default async function TentangKamiPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-4 py-6 pb-24 md:pb-12">
         <h1 className="text-2xl font-bold md:text-3xl">Tentang Kami</h1>
-        <p className="mt-1 font-display text-xl text-brand">鲜货直达</p>
+        <p className="mt-1 font-display text-xl text-brand">é²œè´§ç›´è¾¾</p>
 
         <Card className="mt-4 p-4 text-sm leading-relaxed">
           Jastip China bantu kamu beli barang langsung dari China tanpa ribet. Pilih dari katalog
@@ -72,7 +72,7 @@ export default async function TentangKamiPage() {
 
         <Card className="mt-4 p-4 text-sm">
           <p className="font-display text-lg font-bold">Hubungi kami</p>
-          <p className="mt-1">WhatsApp: 0812-3456-7890</p>
+          <p className="mt-1">WhatsApp: 0878-9838-8993</p>
           <p>Email: hello@jastipchina.id</p>
           <p className="text-ink-muda">Jam: Senin-Sabtu, 09.00-17.00 WIB</p>
           <Link href="/katalog" className="mt-3 inline-block">
