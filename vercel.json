@@ -1,1 +1,1 @@
-{"crons":[{"path":"/api/cron/cek-kadaluwarsa","schedule":"*/15 * * * *"}]}
+{}
