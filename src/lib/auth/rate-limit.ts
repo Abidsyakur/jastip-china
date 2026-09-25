@@ -16,6 +16,20 @@ function getLimiter(): Ratelimit {
   return limiter;
 }
 
+// Endpoint publik yang bisa dipakai enumerasi data (mis. /api/lacak probing
+// nomor invoice) — 20/1 menit per IP: user wajar tidak kena limit, scanner
+// yang hammer ratusan invoice per menit terhenti.
+const limiterLacak = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(20, "1 m"),
+  prefix: "ratelimit:lacak",
+});
+
+export async function cekRateLimitLacak(identifier: string): Promise<HasilRateLimit> {
+  const { success, remaining, reset } = await limiterLacak.limit(identifier);
+  return { diizinkan: success, sisaPercobaan: remaining, resetPada: new Date(reset) };
+}
+
 interface HasilRateLimit {
   diizinkan: boolean;
   sisaPercobaan: number;
