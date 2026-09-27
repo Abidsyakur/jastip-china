@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { StatusPembayaran, StatusKomplain, StatusPesanan } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { rupiah } from "@/lib/format";
+import { kirimTelegram } from "@/lib/notifikasi";
 
 /**
  * Laporan harian untuk n8n (GET dengan Bearer CRON_SECRET, dipanggil
@@ -61,6 +62,11 @@ export async function GET(req: NextRequest) {
     (pembayaranNunggu > 0 || komplainAktif > 0
       ? "⚠️ Ada yang perlu ditindaklanjuti di dashboard."
       : "✅ Semua beres hari ini.");
+
+  // Kirim WA admin LANGSUNG dari endpoint (Telegram) — n8n/cron-job.org
+  // tinggal memanggil endpoint ini, tidak perlu relay. Env belum diisi =
+  // kirimTelegram skip sendiri (warning di log, bukan crash).
+  await kirimTelegram(pesan);
 
   return NextResponse.json({
     tanggal,

@@ -60,3 +60,52 @@ export async function kirimNotifikasiWa(noWaTujuan: string, pesan: string): Prom
 export async function beritahuAdmin(pesan: string): Promise<void> {
   await kirimNotifikasiWa(NOMOR_WA_ADMIN, pesan);
 }
+
+const TELEGRAM_API_URL = "https://api.telegram.org";
+
+/**
+ * Kirim pesan ke Telegram (Bot API) — channel monitoring untuk ADMIN,
+ * paralel dengan WA yang fokusnya customer. Prinsip sama dengan
+ * kirimNotifikasiWa: SELALU dipanggil DI LUAR prisma.$transaction, gagal
+ * kirim TIDAK melempar error ke pemanggil (cukup di-log) — jangan sampai
+ * request utama dianggap gagal cuma karena notifikasi tidak terkirim.
+ *
+ * Env: TELEGRAM_BOT_TOKEN (dari @BotFather) + TELEGRAM_CHAT_ID (dari
+ * @userinfobot / getUpdates). Belum diisi = dilewati dengan warning,
+ * bukan crash — supaya fitur ini bisa di-rollback aman.
+ */
+export async function kirimTelegram(pesan: string): Promise<void> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) {
+    console.warn("[notifikasi] TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID belum diisi, notifikasi Telegram dilewati");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${TELEGRAM_API_URL}/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: pesan }),
+    });
+
+    if (!res.ok) {
+      console.error(`[notifikasi] Telegram membalas ${res.status}: ${await res.text()}`);
+    }
+  } catch (err) {
+    console.error("[notifikasi] Gagal memanggil Telegram:", err);
+  }
+}
+
+/** Notifikasi Telegram ke admin — pemanggilan sama seperti beritahuAdmin. */
+export async function beritahuAdminTelegram(pesan: string): Promise<void> {
+  await kirimTelegram(pesan);
+}
+
+/** Kirim WA + Telegram SEKALIGUS (Promise.all, parallel — tidak saling menunggu). */
+export async function beritahuAdminSemuaChannel(pesan: string): Promise<void> {
+  await Promise.all([
+    kirimNotifikasiWa(NOMOR_WA_ADMIN, pesan),
+    kirimTelegram(pesan),
+  ]);
+}

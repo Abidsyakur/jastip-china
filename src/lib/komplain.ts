@@ -2,7 +2,7 @@
 import { Prisma, StatusKomplain } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
-import { buatNotifikasi, kirimNotifikasiWa, beritahuAdmin } from "@/lib/notifikasi";
+import { buatNotifikasi, kirimNotifikasiWa, beritahuAdminSemuaChannel } from "@/lib/notifikasi";
 import { AppError } from "@/lib/http-error";
 import type { AjukanKomplainInput, TindakLanjutKomplainInput } from "@/lib/validasi";
 
@@ -28,17 +28,23 @@ export async function ajukanKomplain(customerId: string, input: AjukanKomplainIn
     throw new KomplainError("Item pesanan tidak ditemukan", 404);
   }
 
-  return prisma.komplain.create({
+  const komplain = await prisma.komplain.create({
     data: {
       pesananItemId: input.pesananItemId,
       alasan: input.alasan,
       buktiFoto: input.buktiFoto,
       deskripsi: input.deskripsi,
     },
-  }).then(async (k) => {
-    await beritahuAdmin(`Komplain baru masuk atas item pesanan (ID: ${k.pesananItemId}). Alasan: ${k.alasan}`);
-    return k;
   });
+
+  // WA + Telegram paralel, SETELAH create sukses (di luar transaksi —
+  // create tunggal bukan $transaction, tapi prinsipnya sama: gagal kirim
+  // ditelan di lib, tidak boleh menggagalkan komplain yang sudah jadi).
+  await beritahuAdminSemuaChannel(
+    `Komplain baru masuk atas pesanan ${pesananItem.pesanan.noInvoice} (item: ${pesananItem.namaItemSnapshot}). Alasan: ${input.alasan}`
+  );
+
+  return komplain;
 }
 
 /**

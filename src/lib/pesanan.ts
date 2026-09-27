@@ -1,12 +1,13 @@
 // letak: src/lib/pesanan.ts
-import { Prisma, ProdukStatus, StatusPesanan, StatusPembayaran, SumberItem } from "@prisma/client";
+import { Prisma, ProdukStatus, StatusPesanan, StatusPembayaran, SumberItem, type Pesanan, type Pembayaran } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { kurangiStokAtomik, kembalikanStok } from "@/lib/stok";
 import { buatNoInvoice } from "@/lib/no-invoice";
 import { AppError } from "@/lib/http-error";
 import { catatLogAktivitas } from "@/lib/log-aktivitas";
-import { buatNotifikasi, kirimNotifikasiWa, beritahuAdmin } from "@/lib/notifikasi";
+import { buatNotifikasi, kirimNotifikasiWa, beritahuAdmin, beritahuAdminSemuaChannel, beritahuAdminTelegram } from "@/lib/notifikasi";
 import { hitungBiayaJasaTitip, hitungOngkirDomestik } from "@/lib/tarif";
+import { rupiah } from "@/lib/format";
 import type { CheckoutInput, UpdateBiayaInput, UpdateStatusPesananInput, UpdatePengirimanInput } from "@/lib/validasi";
 
 const JAM_KEDALUWARSA_PEMBAYARAN = Number(process.env.PEMBAYARAN_KEDALUWARSA_JAM ?? 24);
@@ -75,9 +76,11 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
     }
   }
 
+  let hasilCheckout: { pesanan: Pesanan; pembayaran: Pembayaran } | null = null;
+
   for (let percobaan = 0; percobaan < MAKS_PERCOBAAN_NO_INVOICE; percobaan++) {
     try {
-      return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      hasilCheckout = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         let subtotalProduk = 0;
         let beratTotalGram = 0;
         const pesananItemData: PesananItemBaru[] = [];
@@ -148,10 +151,14 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
         // cuma untuk item yang dipilih (bisa sebagian), sisanya tetap di keranjang.
         await tx.keranjangItem.deleteMany({ where: { id: { in: keranjangItemIds } } });
 
-        await beritahuAdmin(`Pesanan baru masuk: ${pesanan.noInvoice} - Total: ${pesanan.totalAkhir}`);
+        // Notifikasi WA/Telegram TIDAK di sini — panggilan eksternal di dalam
+        // transaksi melanggar prinsip "di luar/setelah commit" (Fonnte lambat
+        // bisa nge-block transaksi DB). Dipindah setelah transaksi sukses.
 
         return { pesanan, pembayaran };
       });
+
+      break; // sukses — keluar dari loop percobaan invoice
     } catch (err) {
       const bolehRetry =
         err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -162,9 +169,20 @@ export async function prosesCheckout(customerId: string, input: CheckoutInput) {
     }
   }
 
-  // Praktis tidak akan pernah sampai sini (peluang 3x tabrakan berturut-turut
-  // hampir nol), tapi TypeScript perlu return path yang eksplisit.
-  throw new CheckoutError("Gagal membuat pesanan, coba lagi", 500);
+  if (!hasilCheckout) {
+    // Praktis tidak akan pernah sampai sini (peluang 3x tabrakan berturut-turut
+    // hampir nol), tapi TypeScript perlu return path yang eksplisit.
+    throw new CheckoutError("Gagal membuat pesanan, coba lagi", 500);
+  }
+
+  // WA + Telegram DI LUAR/SETELAH transaksi (prinsip README) — kalau Fonnte/
+  // Telegram down/lambat, itu tidak boleh membuat transaksi DB ikut gagal
+  // atau nge-block. Gagal kirim ditelan di lib (cukup di-log).
+  await beritahuAdminSemuaChannel(
+    `Pesanan baru masuk: ${hasilCheckout.pesanan.noInvoice} - Total: ${rupiah(Number(hasilCheckout.pesanan.totalAkhir))}`
+  );
+
+  return hasilCheckout;
 }
 
 /** Error untuk operasi admin di modul pesanan (biaya, status, pengiriman) — terpisah dari CheckoutError secara semantik, sama-sama AppError. */
@@ -243,7 +261,11 @@ export async function updateStatusPesanan(adminId: string, pesananId: string, in
     return { berhasil: true };
   });
 
-  await kirimNotifikasiWa(pesanan.customer.noWa, pesanNotif);
+  // WA customer + Telegram admin paralel (di luar transaksi — prinsip README).
+  await Promise.all([
+    kirimNotifikasiWa(pesanan.customer.noWa, pesanNotif),
+    beritahuAdminTelegram(pesanNotif),
+  ]);
 
   return hasil;
 }
