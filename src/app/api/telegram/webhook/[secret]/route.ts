@@ -1,5 +1,6 @@
 // letak: src/app/api/telegram/webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { StatusPembayaran, StatusKomplain } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
@@ -36,6 +37,8 @@ async function balas(chatId: number, text: string): Promise<void> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text }),
+    // Anti-hang: Telegram down/lambat tidak boleh menggantung function.
+    signal: AbortSignal.timeout(30_000),
   });
 }
 
@@ -162,14 +165,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sec
     return NextResponse.json({ ok: true });
   }
 
-  const jawabanAi = await tanyaAi(msg.text.trim());
-  await balas(msg.chat.id, jawabanAi);
+  // AI bisa lambat (60s+ di NIM) — Telegram butuh respons 200 CEPAT, kalau
+  // tidak dia retry update yang sama (balasan duplikat). Pola yang benar:
+  // balas 200 SEKARANG, proses AI via waitUntil — tetap jalan sampai selesai
+  // setelah response, lalu balas ke Telegram.
+  waitUntil(
+    tanyaAi(msg.text.trim())
+      .then((jawaban) => balas(msg.chat.id, jawaban))
+      .catch(() => balas(msg.chat.id, "⚠️ Gagal memproses. Coba lagi."))
+  );
   return NextResponse.json({ ok: true });
 }
-
-// ======================================================
-// AI REPLY — mini-agent dengan tool-calling (NVIDIA NIM, OpenAI-compatible)
-// ======================================================
 
 const AI_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const AI_MODEL = process.env.AI_MODEL ?? "z-ai/glm-5.3-flash";
@@ -294,7 +300,9 @@ async function tanyaAi(pertanyaan: string): Promise<string> {
       const res = await fetch(AI_API_URL, {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: AI_MODEL, messages: pesan, tools: TOOLS, temperature: 0.3 }),
+        body: JSON.stringify({ model: AI_MODEL, messages: pesan, tools: TOOLS, temperature: 0.3, max_tokens: 2000 }),
+        // Anti-hang (penyebab 504 sebelumnya): NIM bisa lambat/hang — putus di 100s.
+        signal: AbortSignal.timeout(100_000),
       });
       if (!res.ok) {
         return `⚠️ AI error (${res.status}). Coba lagi sebentar.`;
