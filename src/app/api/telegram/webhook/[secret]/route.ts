@@ -301,8 +301,9 @@ async function tanyaAi(pertanyaan: string): Promise<string> {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({ model: AI_MODEL, messages: pesan, tools: TOOLS, temperature: 0.3, max_tokens: 2000 }),
-        // Anti-hang (penyebab 504 sebelumnya): NIM bisa lambat/hang — putus di 100s.
-        signal: AbortSignal.timeout(100_000),
+        // Anti-hang (penyebab 504 sebelumnya): NIM bisa lambat (terukur 60-117s
+        // bahkan untuk prompt kecil) — putus di 240s, masih di bawah limit Vercel.
+        signal: AbortSignal.timeout(240_000),
       });
       if (!res.ok) {
         return `⚠️ AI error (${res.status}). Coba lagi sebentar.`;
