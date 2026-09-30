@@ -300,7 +300,16 @@ async function tanyaAi(pertanyaan: string): Promise<string> {
       const res = await fetch(AI_API_URL, {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: AI_MODEL, messages: pesan, tools: TOOLS, temperature: 0.3, max_tokens: 2000 }),
+        // thinking: false — GLM 5.3 reasoning model; reasoning dipatasi supaya
+        // latency turun 5x (terukur 111s -> 22s). Untuk monitoring Q&A cukup.
+        body: JSON.stringify({
+          model: AI_MODEL,
+          messages: pesan,
+          tools: TOOLS,
+          temperature: 0.3,
+          max_tokens: 2000,
+          chat_template_kwargs: { thinking: false },
+        }),
         // Anti-hang (penyebab 504 sebelumnya): NIM bisa lambat (terukur 60-117s
         // bahkan untuk prompt kecil) — putus di 240s, masih di bawah limit Vercel.
         signal: AbortSignal.timeout(240_000),
