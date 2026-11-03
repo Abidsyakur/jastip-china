@@ -78,8 +78,7 @@
           ]
         }
       },
-      "id": "b1-schedule",
-      "name": "Trigger Jobs (15m)",
+      "id": "b1-schedule","name": "Trigger Jobs (15m)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [0, 0]
