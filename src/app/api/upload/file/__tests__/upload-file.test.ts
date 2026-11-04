@@ -4,9 +4,15 @@ import assert from "node:assert/strict";
 import { NextRequest } from "next/server";
 import { mockPrismaClientModule } from "@/test-utils/mock-prisma-client";
 
+// GANTI sesuai lokasi file yang berisi cekRateLimitUpload
+const PATH_RATE_LIMIT = "@/lib/auth/rate-limit";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fakeR2: { unggah?: (...a: any[]) => Promise<void> } = {};
 let POST: typeof import("../route").POST;
+
+// Status rate limit bisa diubah per test (default: diizinkan)
+const fakeRateLimit = { diizinkan: true };
 
 before(async () => {
   process.env.JWT_ACCESS_SECRET = "secret-testing-upload-file-minimal-32-karakter";
@@ -17,11 +23,18 @@ before(async () => {
       unggahBufferKeR2: async (...a: never[]) => fakeR2.unggah?.(...a),
     },
   });
+  // Mock rate limiter supaya test tidak menyentuh Upstash/Redis sungguhan
+  mock.module(PATH_RATE_LIMIT, {
+    namedExports: {
+      cekRateLimitUpload: async () => ({ diizinkan: fakeRateLimit.diizinkan }),
+    },
+  });
   ({ POST } = await import("../route"));
 });
 
 beforeEach(() => {
   delete fakeR2.unggah;
+  fakeRateLimit.diizinkan = true;
 });
 
 async function cookieCustomer(sub = "cust_1") {
@@ -55,7 +68,6 @@ test("POST upload/file tipe tidak diizinkan ditolak 400", async () => {
 });
 
 test("POST upload/file berhasil: kembali publicUrl same-origin", async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let keyTersimpan = "";
   fakeR2.unggah = async (key: string) => {
     keyTersimpan = key;

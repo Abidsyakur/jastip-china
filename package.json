@@ -9,6 +9,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test --experimental-test-module-mocks \"src/**/__tests__/*.test.ts\"",
+    "test:coverage": "c8 --reporter=text --reporter=html --include=\"src/**\" --exclude=\"src/**/__tests__/**\" --exclude=\"src/test-utils/**\" npm test",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
@@ -47,6 +48,9 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
+    "c8": "^12.0.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "15.5",
     "prisma": "^6.1.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

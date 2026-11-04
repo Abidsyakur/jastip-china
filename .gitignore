@@ -1,6 +1,9 @@
 # dependencies
 /node_modules
 
+#coverage
+/coverage
+
 # next.js
 /.next/
 /out/
