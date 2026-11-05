@@ -1,6 +1,7 @@
 // letak: src/app/api/cron/cek-kedaluwarsa/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prosesKedaluwarsaPembayaran } from "@/lib/pembayaran";
+import { wajibCron } from "@/lib/auth/cron";
 
 /**
  * Vercel Cron memanggil endpoint ini via GET dengan header
@@ -9,10 +10,8 @@ import { prosesKedaluwarsaPembayaran } from "@/lib/pembayaran";
  * wajibCustomer/wajibAdmin karena ini dipanggil sistem, bukan user.
  */
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Tidak diizinkan" }, { status: 401 });
-  }
+  const tolak = wajibCron(req);
+  if (tolak) return tolak;
 
   const hasil = await prosesKedaluwarsaPembayaran();
 

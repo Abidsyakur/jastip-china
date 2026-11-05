@@ -109,7 +109,7 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="mb-2 text-sm font-semibold">Hubungi kami</p>
-          <p className="text-sm opacity-80">WA 0878-9838-8993</p>
+          <p className="text-sm opacity-80">WA (Abid) 0878-9838-8993</p>
           <p className="text-sm opacity-80">Senin sampai Sabtu 09.00 sampai 17.00</p>
         </div>
       </div>

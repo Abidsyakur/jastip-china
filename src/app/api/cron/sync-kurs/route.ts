@@ -1,6 +1,7 @@
 // letak: src/app/api/cron/sync-kurs/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { wajibCron } from "@/lib/auth/cron";
 
 /**
  * Sync kurs RMB-IDR otomatis untuk n8n/cron-job.org (GET dengan Bearer
@@ -23,10 +24,8 @@ const KURS_MAKS_WAJAR = 10000;
 const SELISIH_MIN = 1;
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Tidak diizinkan" }, { status: 401 });
-  }
+  const tolak = wajibCron(req);
+  if (tolak) return tolak;
 
   let kursBaru: number;
   try {
@@ -73,7 +72,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const kurs = await prisma.kursMaster.create({
+  await prisma.kursMaster.create({
     data: { adminId: owner.id, kursRmbIdr: kursBaru },
   });
 

@@ -4,6 +4,7 @@ import { StatusPesanan } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { kirimNotifikasiWa } from "@/lib/notifikasi";
 import { rupiah } from "@/lib/format";
+import { wajibCron } from "@/lib/auth/cron";
 
 /**
  * Reminder pembayaran untuk n8n/cron-job.org (GET dengan Bearer
@@ -37,10 +38,8 @@ interface Kandidat {
 }
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Tidak diizinkan" }, { status: 401 });
-  }
+  const tolak = wajibCron(req);
+    if (tolak) return tolak;
 
   const deadlineMs = JAM_KEDALUWARSA_PEMBAYARAN * 60 * 60 * 1000;
   const sekarang = Date.now();

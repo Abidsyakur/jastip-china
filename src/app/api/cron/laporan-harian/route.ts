@@ -4,6 +4,7 @@ import { StatusPembayaran, StatusKomplain, StatusPesanan } from "@prisma/client"
 import { prisma } from "@/lib/db";
 import { rupiah } from "@/lib/format";
 import { kirimTelegram } from "@/lib/notifikasi";
+import { wajibCron } from "@/lib/auth/cron";
 
 /**
  * Laporan harian untuk n8n (GET dengan Bearer CRON_SECRET, dipanggil
@@ -17,10 +18,8 @@ import { kirimTelegram } from "@/lib/notifikasi";
 const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Tidak diizinkan" }, { status: 401 });
-  }
+  const tolak = wajibCron(req);
+  if (tolak) return tolak;
 
   // Jendela "hari ini" mengikuti hari WIB (UTC+7) — sama dengan yang
   // dirasakan pembaca laporan, bukan batas hari UTC.
