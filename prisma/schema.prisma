@@ -465,3 +465,12 @@ model LogAktivitas {
 
   @@map("log_aktivitas")
 }
+
+model RateLimit {
+  kunci     String   @id
+  jumlah    Int
+  resetPada DateTime @map("reset_pada")
+
+  @@index([resetPada])
+  @@map("rate_limit")
+}

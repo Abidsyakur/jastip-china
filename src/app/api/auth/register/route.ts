@@ -6,7 +6,7 @@ import { cekRateLimitRegister } from "@/lib/auth/rate-limit";
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  const limit = await cekRateLimitRegister(`register:${ip}`);
+  const limit = await cekRateLimitRegister(ip);
   if (!limit.diizinkan) {
     return NextResponse.json(
       { error: "Terlalu banyak percobaan registrasi dari IP ini, coba lagi nanti." },

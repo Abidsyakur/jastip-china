@@ -3,7 +3,7 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline';
   style-src 'self' 'unsafe-inline';
-  img-src 'self' blob: data: https://*.r2.cloudflarestorage.com;
+  img-src 'self' blob: data: https://*.r2.cloudflarestorage.com https://contoh.com;
   font-src 'self';
   object-src 'none';
   base-uri 'self';
@@ -15,13 +15,17 @@ const cspHeader = `
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '*.r2.cloudflarestorage.com',
-      },
-    ],
-  },
+  remotePatterns: [
+    {
+      protocol: 'https',
+      hostname: '*.r2.cloudflarestorage.com',
+    },
+    {
+      protocol: 'https',
+      hostname: 'contoh.com',
+    },
+  ],
+},
   async headers() {
     return [
       {
