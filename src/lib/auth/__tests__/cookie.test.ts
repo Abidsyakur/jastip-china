@@ -4,11 +4,17 @@ import assert from "node:assert/strict";
 import { NextResponse } from "next/server";
 import {
   COOKIE_ACCESS_TOKEN,
+  AKSES_TOKEN_UMUR_DETIK,
   COOKIE_REFRESH_TOKEN,
   setAccessTokenCookie,
   setRefreshTokenCookie,
   hapusCookieAuth,
 } from "../cookie";
+
+
+test("umur access token 24 jam, sama untuk semua route", () => {
+  assert.equal(AKSES_TOKEN_UMUR_DETIK, 86400);
+});
 
 /** Ambil satu-satunya header Set-Cookie dari response (gagal jelas kalau jumlahnya bukan 1). */
 function cookieTunggal(res: NextResponse): string {

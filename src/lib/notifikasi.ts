@@ -35,11 +35,20 @@ export function buatNotifikasi(
  * verifikasi pembayaran, dst) sudah berhasil dari sisi data; jangan sampai
  * itu dianggap gagal cuma karena notifikasi tidak terkirim.
  */
-export async function kirimNotifikasiWa(noWaTujuan: string, pesan: string): Promise<void> {
+/**
+ * Kirim pesan WA via Fonnte. Mengembalikan true HANYA bila benar-benar terkirim,
+ * false bila dilewati (token kosong) atau gagal. Tetap TIDAK melempar error ke
+ * pemanggil, tapi pemanggil yang butuh kepastian (mis. pengingat pembayaran)
+ * bisa memakai nilai kembaliannya.
+ *
+ * PENTING (prinsip dari README): fungsi ini SELALU dipanggil DI LUAR
+ * prisma.$transaction, dan SETELAH transaksi DB terkait sudah commit.
+ */
+export async function kirimNotifikasiWa(noWaTujuan: string, pesan: string): Promise<boolean> {
   const token = process.env.FONNTE_API_TOKEN;
   if (!token) {
     console.warn("[notifikasi] FONNTE_API_TOKEN belum diisi, notifikasi WA dilewati");
-    return;
+    return false;
   }
 
   try {
@@ -51,11 +60,24 @@ export async function kirimNotifikasiWa(noWaTujuan: string, pesan: string): Prom
 
     if (!res.ok) {
       console.error(`[notifikasi] Fonnte membalas ${res.status}: ${await res.text()}`);
+      return false;
     }
+
+    // Fonnte bisa membalas HTTP 200 tetapi status:false di badan JSON (mis. perangkat
+    // terputus). Hanya status:false yang eksplisit dianggap gagal; badan bukan JSON
+    // dianggap sukses karena HTTP-nya sudah OK. Cek format balasan Fonnte Anda.
+    const badan: unknown = await res.json().catch(() => null);
+    if (typeof badan === "object" && badan !== null && (badan as { status?: unknown }).status === false) {
+      console.error("[notifikasi] Fonnte menolak pesan:", badan);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.error("[notifikasi] Gagal memanggil Fonnte:", err);
+    return false;
   }
 }
+
 
 export async function beritahuAdmin(pesan: string): Promise<void> {
   await kirimNotifikasiWa(NOMOR_WA_ADMIN, pesan);

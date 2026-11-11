@@ -1,5 +1,6 @@
-// letak: src/app/api/telegram/webhook/route.ts
+// letak: src/app/api/telegram/webhook/[secret]/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { sesuaiRahasia } from "@/lib/auth/cron";
 import { waitUntil } from "@vercel/functions";
 import { StatusPembayaran, StatusKomplain } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -30,21 +31,52 @@ interface TelegramUpdate {
   };
 }
 
+console.info("[Telegram Webhook] Request diterima");
+
 async function balas(chatId: number, text: string): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) return;
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text }),
-    // Anti-hang: Telegram down/lambat tidak boleh menggantung function.
-    signal: AbortSignal.timeout(30_000),
-  });
+
+  if (!token) {
+    console.error("TELEGRAM_BOT_TOKEN belum dikonfigurasi");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.telegram.org/bot${token}/sendMessage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+        }),
+        signal: AbortSignal.timeout(15000),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      console.error("Telegram sendMessage gagal:", {
+        status: res.status,
+        description: data.description,
+        error_code: data.error_code,
+      });
+    }
+  } catch (error) {
+    console.error("Telegram request error:", error);
+  }
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ secret: string }> }) {
-  const { secret } = await params;
-  if (secret !== process.env.CRON_SECRET) {
+    const { secret } = await params;
+  // Rahasia webhook TERPISAH dari TELEGRAM_WEBHOOK_SECRET (rahasia di URL ikut tercatat di log
+  // request; kebocoran satu tidak boleh membuka yang lain), dibandingkan dengan
+  // perbandingan waktu-konstan. Variabel kosong = SEMUA permintaan ditolak.
+  if (!sesuaiRahasia(secret, process.env.TELEGRAM_WEBHOOK_SECRET)) {
     return NextResponse.json({ error: "Tidak diizinkan" }, { status: 403 });
   }
 

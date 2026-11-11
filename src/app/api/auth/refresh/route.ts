@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import type { AdminRole } from "@prisma/client";
+import { AKSES_TOKEN_UMUR_DETIK } from "@/lib/auth/cookie";
 import {
   COOKIE_REFRESH_TOKEN,
   setAccessTokenCookie,
@@ -11,7 +12,7 @@ import {
   buatAccessToken,
 } from "@/lib/auth";
 
-const AKSES_TOKEN_UMUR_DETIK = 24 * 60 * 60;
+
 
 export async function POST(req: NextRequest) {
   const refreshTokenLama = req.cookies.get(COOKIE_REFRESH_TOKEN)?.value;

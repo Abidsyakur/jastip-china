@@ -9,10 +9,8 @@ import {
   setAccessTokenCookie,
   setRefreshTokenCookie,
 } from "@/lib/auth";
+import { AKSES_TOKEN_UMUR_DETIK } from "@/lib/auth/cookie";
 import { cekRateLimitLogin } from "@/lib/auth/rate-limit";
-
-
-const AKSES_TOKEN_UMUR_DETIK = 15 * 60;
 
 export async function POST(req: NextRequest) {
   const parsed = await parseBody(req, loginSchema);
@@ -20,8 +18,12 @@ export async function POST(req: NextRequest) {
 
   const { noWa, email, password } = parsed.data;
 
-  // Rate limit di-key oleh akun yang dicoba, bukan cuma IP — lihat komentar di rate-limit.ts
-  const limit = await cekRateLimitLogin(`customer:${noWa ?? email}`);
+  // Rate limit di-key oleh akun yang dicoba, bukan cuma IP — lihat komentar di rate-limit.ts.
+  // Kunci DINORMALISASI (nomor WA dalam bentuk baku, email huruf kecil) supaya
+  // "0812...", "+62812...", dan "Budi@X.com" vs "budi@x.com" tidak masing-masing
+  // mendapat jatah percobaan sendiri.
+  const kunciAkun = noWa ? normalisasiNoWa(noWa) : (email ?? "").trim().toLowerCase();
+  const limit = await cekRateLimitLogin(`customer:${kunciAkun}`);
   if (!limit.diizinkan) {
     return NextResponse.json(
       { error: "Terlalu banyak percobaan login, coba lagi beberapa menit lagi" },

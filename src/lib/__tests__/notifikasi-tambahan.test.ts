@@ -218,3 +218,50 @@ test("beritahuAdminSemuaChannel: kegagalan satu channel tidak menghentikan chann
 
   assert.ok(urlDipanggil.some((u) => u.includes("telegram")));
 });
+
+// --- nilai kembalian kirimNotifikasiWa ---
+
+async function hasilKirim(balas: () => Response | Promise<Response>) {
+  mock.restoreAll();
+  mock.method(console, "error", () => {});
+  mock.method(console, "warn", () => {});
+  mock.method(globalThis, "fetch", async () => balas());
+  return kirimNotifikasiWa("08123", "x");
+}
+
+test("kirimNotifikasiWa: token kosong -> false (dilewati)", async () => {
+  delete process.env.FONNTE_API_TOKEN;
+
+  assert.equal(await hasilKirim(() => new Response("ok")), false);
+});
+
+test("kirimNotifikasiWa: terkirim -> true (badan JSON status true, atau badan bukan JSON)", async () => {
+  process.env.FONNTE_API_TOKEN = "TOKEN-WA";
+
+  assert.equal(await hasilKirim(() => new Response(JSON.stringify({ status: true, id: ["1"] }))), true);
+  assert.equal(await hasilKirim(() => new Response("ok")), true);
+});
+
+test("kirimNotifikasiWa: HTTP error -> false", async () => {
+  process.env.FONNTE_API_TOKEN = "TOKEN-WA";
+
+  assert.equal(await hasilKirim(() => new Response("galat", { status: 500 })), false);
+});
+
+test("kirimNotifikasiWa: HTTP 200 tetapi status:false di badan -> false", async () => {
+  process.env.FONNTE_API_TOKEN = "TOKEN-WA";
+
+  const hasil = await hasilKirim(() => new Response(JSON.stringify({ status: false, reason: "device disconnect" })));
+
+  assert.equal(hasil, false);
+});
+
+test("kirimNotifikasiWa: jaringan putus -> false, tidak melempar", async () => {
+  process.env.FONNTE_API_TOKEN = "TOKEN-WA";
+
+  const hasil = await hasilKirim(() => {
+    throw new Error("jaringan putus");
+  });
+
+  assert.equal(hasil, false);
+});

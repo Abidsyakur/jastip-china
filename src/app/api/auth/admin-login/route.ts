@@ -8,9 +8,8 @@ import {
   setAccessTokenCookie,
   setRefreshTokenCookie,
 } from "@/lib/auth";
+import { AKSES_TOKEN_UMUR_DETIK } from "@/lib/auth/cookie";
 import { cekRateLimitLogin } from "@/lib/auth/rate-limit";
-
-const AKSES_TOKEN_UMUR_DETIK = 15 * 60;
 
 export async function POST(req: NextRequest) {
   const parsed = await parseBody(req, adminLoginSchema);
@@ -18,7 +17,9 @@ export async function POST(req: NextRequest) {
 
   const { email, password } = parsed.data;
 
-  const limit = await cekRateLimitLogin(`admin:${email}`);
+  // Kunci pembatas dinormalisasi (huruf kecil, tanpa spasi tepi) supaya
+  // variasi penulisan email tidak melipatgandakan jatah percobaan.
+  const limit = await cekRateLimitLogin(`admin:${email.trim().toLowerCase()}`);
   if (!limit.diizinkan) {
     return NextResponse.json(
       { error: "Terlalu banyak percobaan login, coba lagi beberapa menit lagi" },

@@ -31,7 +31,7 @@ const BATAS = {
   // ratusan invoice per menit terhenti.
   lacak: { prefix: "lacak", maks: 20, jendelaDetik: 60, gagalTerbuka: true },
   // 3 akun / 1 jam
-  register: { prefix: "register", maks: 5, jendelaDetik: 60 * 60, gagalTerbuka: false },
+  register: { prefix: "register", maks: 3, jendelaDetik: 60 * 60, gagalTerbuka: false },
   // 50 upload / 24 jam
   upload: { prefix: "upload", maks: 50, jendelaDetik: 24 * 60 * 60, gagalTerbuka: true },
 } satisfies Record<string, Batas>;

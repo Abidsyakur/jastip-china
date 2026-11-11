@@ -3,6 +3,8 @@ import type { NextResponse } from "next/server";
 export const COOKIE_ACCESS_TOKEN = "jastip_access_token";
 export const COOKIE_REFRESH_TOKEN = "jastip_refresh_token";
 
+export const AKSES_TOKEN_UMUR_DETIK = 24 * 60 * 60;
+
 const opsiDasar = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",

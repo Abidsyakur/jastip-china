@@ -12,15 +12,17 @@ import { wajibCron } from "@/lib/auth/cron";
  * yang deadline-nya (tglPesan + 24 jam) hampir habis: sisa 12 jam dan
  * sisa 2 jam — dua titik reminder, bukan spam tiap tick.
  *
- * Anti-spam: tiap reminder yang terkirim ditandai baris Notifikasi
+ * Anti-spam: tiap reminder yang TERKIRIM ditandai baris Notifikasi
  * (tipe REMINDER_12H / REMINDER_2H). Cron berikutnya cek dulu tanda
- * itu — pesanan yang sudah direminder di titik yang sama dilewati,
- * walau endpoint dipanggil berkali-kali dalam jendela waktu.
+ * itu — pesanan yang sudah direminder di titik yang sama dilewati.
  *
- * WA dikirim SETELAH baris Notifikasi tersimpan (prinsip README):
- * kalau Fonnte gagal, tanda TIDAK ikut tersimpan — cron berikutnya
- * otomatis mencoba lagi. Gagal kirim WA tidak melempar error ke
- * pemanggil (cukup di-hit di hasil).
+ * URUTAN: WA dikirim DULU, tanda dicatat SESUDAH WA benar-benar terkirim.
+ * Kalau WA gagal (Fonnte down, token kosong, perangkat terputus), tanda
+ * TIDAK dicatat sehingga cron berikutnya mencoba lagi selama pesanan masih
+ * di jendela waktunya. Konsekuensinya: kalau WA terkirim tapi penyimpanan
+ * tanda gagal, pesan bisa terkirim dua kali (lebih baik daripada tidak
+ * terkirim sama sekali). Gagal kirim tidak melempar error ke pemanggil;
+ * cukup dicatat di daftar `gagal` pada respons.
  */
 const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
 const JAM_KEDALUWARSA_PEMBAYARAN = Number(process.env.PEMBAYARAN_KEDALUWARSA_JAM ?? 24);
@@ -39,7 +41,7 @@ interface Kandidat {
 
 export async function GET(req: NextRequest) {
   const tolak = wajibCron(req);
-    if (tolak) return tolak;
+  if (tolak) return tolak;
 
   const deadlineMs = JAM_KEDALUWARSA_PEMBAYARAN * 60 * 60 * 1000;
   const sekarang = Date.now();
@@ -90,8 +92,7 @@ export async function GET(req: NextRequest) {
     kandidat.push(...tersisa);
   }
 
-  // Tandai dulu (DB), kirim sesudahnya — kalau Fonnte gagal, tanda tidak
-  // tersimpan dan cron berikutnya mencoba lagi.
+  // Kirim WA dulu; tanda dicatat HANYA bila WA benar-benar terkirim.
   let dikirim = 0;
   const gagal: string[] = [];
   for (const k of kandidat) {
@@ -100,10 +101,14 @@ export async function GET(req: NextRequest) {
       `belum dibayar. Sisa waktu pembayaran ${k.sisaJam} jam ${k.sisaMenit} menit ` +
       `sebelum pesanan dibatalkan otomatis.`;
     try {
+      const terkirim = await kirimNotifikasiWa(k.noWa, pesan);
+      if (!terkirim) {
+        gagal.push(k.noInvoice);
+        continue;
+      }
       await prisma.notifikasi.create({
         data: { customerId: k.customerId, pesananId: k.pesananId, pesan, tipe: k.tipe },
       });
-      await kirimNotifikasiWa(k.noWa, pesan);
       dikirim++;
     } catch {
       gagal.push(k.noInvoice);
